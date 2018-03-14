@@ -22,6 +22,7 @@ public class PlayerController : MonoBehaviour {
     private bool bJumpable = true;
     private bool bOnWall = false;
     private bool bGrounded = false;
+    private bool bCrouching = false;
 
     struct PlayerRaycasts // To store the informations of raycasts around the player to calculate physics
     {
@@ -38,6 +39,7 @@ public class PlayerController : MonoBehaviour {
     RaycastHit2D[] anyRaycast = new RaycastHit2D[7];
 
     [SerializeField] float speed = 3f;
+    private float actualSpeed;
 
 	// Use this for initialization
 	void Start () {
@@ -51,14 +53,19 @@ public class PlayerController : MonoBehaviour {
         //{
         //    print("Dodge");
         //}
-        //if(input.Crouch)
-        //{
-        //    print("Crouch");
-        //}
         //if(input.Interact)
         //{
         //    print("Grab or throw");
         //}
+        if (input.Crouch)
+        {
+            Crouch();
+        }
+        else
+        {
+            bCrouching = false;
+            rend.flipY = false;
+        }
         HandleJump();
         Flip();
 	}
@@ -71,13 +78,23 @@ public class PlayerController : MonoBehaviour {
         rays.bottomRight = Physics2D.Raycast(transform.position + Vector3.right * 0.1f + Vector3.down * 0.4f, Vector2.down, 0.2f);
         rays.bottomLeft = Physics2D.Raycast(transform.position + Vector3.right * -0.2f + Vector3.down * 0.4f, Vector2.down, 0.2f);
 
-        rays.upperRight = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.right * 0.4f, Vector2.left, 0.2f);
         rays.lowerRight = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.right * 0.4f, Vector2.left, 0.2f);
-
-        rays.upperLeft = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.left * 0.4f, Vector2.right, 0.2f);
         rays.lowerLeft = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.left * 0.4f, Vector2.right, 0.2f);
 
-        rays.top = Physics2D.Raycast(transform.position + Vector3.up * 0.4f, Vector2.up, 0.3f);
+        if (!bCrouching)
+        {
+            rays.upperRight = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.right * 0.4f, Vector2.left, 0.2f);
+            rays.upperLeft = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.left * 0.4f, Vector2.right, 0.2f);
+
+            rays.top = Physics2D.Raycast(transform.position + Vector3.up * 0.4f, Vector2.up, 0.2f);
+        }
+        else
+        {
+            rays.upperRight = Physics2D.Raycast(transform.position + Vector3.right * 0.4f, Vector2.left, 0.2f);
+            rays.upperLeft = Physics2D.Raycast(transform.position + Vector3.left * 0.4f, Vector2.right, 0.2f);
+
+            rays.top = Physics2D.Raycast(transform.position + Vector3.up * 0.1f, Vector2.up, 0.2f);
+        }
 
         anyRaycast[0] = rays.bottomRight;
         anyRaycast[1] = rays.bottomLeft;
@@ -89,7 +106,16 @@ public class PlayerController : MonoBehaviour {
 
         #endregion
 
-        velocity = new Vector3(input.Horizontal * speed * Time.fixedDeltaTime, velocity.y);
+        if(bCrouching)
+        {
+            actualSpeed = speed / 4;
+        }
+        else
+        {
+            actualSpeed = speed;
+        }
+
+        velocity = new Vector3(input.Horizontal * actualSpeed * Time.fixedDeltaTime, velocity.y);
 
         CheckGrounded();
         if (!bGrounded)
@@ -103,8 +129,8 @@ public class PlayerController : MonoBehaviour {
 
     //private void OnDrawGizmos()
     //{
-    //    Gizmos.DrawRay(transform.position + Vector3.right * 0.1f + Vector3.down * 0.4f, Vector2.down * 0.2f);
-    //    Gizmos.DrawRay(transform.position + Vector3.right * -0.2f + Vector3.down * 0.4f, Vector2.down * 0.2f);
+    //    Gizmos.DrawRay(transform.position + Vector3.up * 0.1f, Vector2.up * 0.2f);
+    //    Gizmos.DrawRay(transform.position + Vector3.up * -0.4f + Vector3.right * 0.4f, Vector2.left * 0.2f);
     //}
 
 
@@ -313,6 +339,12 @@ public class PlayerController : MonoBehaviour {
     }
 
     #endregion
+
+    private void Crouch()
+    {
+        bCrouching = true;
+        rend.flipY = true;
+    }
 
     /// <summary>
     /// Checks if the player is on the ground or not
