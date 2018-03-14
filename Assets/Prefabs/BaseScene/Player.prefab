@@ -148,7 +148,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gravity: 0.5
   veloYLimit: -0.8
-  wallSlideSpeed: 0.4
+  wallSlideSpeed: 2.5
   jumpForce: 7
   jumpCooldown: 0.1
   fallFactor: 0.15

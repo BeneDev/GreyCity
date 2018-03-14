@@ -7,7 +7,7 @@ public class PlayerController : MonoBehaviour {
     [Header("Physics"), SerializeField] float gravity = 1f;
     [SerializeField] float veloYLimit = -1f;
     [SerializeField] float wallSlideSpeed = 0.4f;
-    private Vector3 pointToPullUpTo;
+    private float heightToPullUpTo;
 
     [SerializeField] float jumpForce = 1f;
     [SerializeField] float jumpCooldown = 0.1f;
@@ -72,7 +72,7 @@ public class PlayerController : MonoBehaviour {
         HandleJump();
         if(!bOnWall)
         {
-            pointToPullUpTo = Vector3.zero;
+            heightToPullUpTo = 0f;
         }
         Flip();
 	}
@@ -325,11 +325,12 @@ public class PlayerController : MonoBehaviour {
             else if(bOnWall)
             {
                 //Play pull up animation
-                RaycastHit2D hit = (RaycastHit2D)WhichRaycastForTag("Ground", rays.upperLeft, rays.lowerLeft, rays.lowerRight, rays.upperRight);
-                if(hit.collider != null)
-                {
-                    pointToPullUpTo = hit.collider.bounds.min;// - Vector3.left * hit.collider.bounds.extents.x/2;
-                }
+                //RaycastHit2D hit = (RaycastHit2D)WhichRaycastForTag("Ground", rays.upperLeft, rays.lowerLeft, rays.lowerRight, rays.upperRight);
+                //if(hit.collider != null)
+                //{
+                //    heightToPullUpTo = hit.collider.bounds.size.y;
+                //    transform.position += Vector3.up * heightToPullUpTo;
+                //}
             }
         }
         // Make the player fall less fast when still holding the jump button
