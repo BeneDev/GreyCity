@@ -149,11 +149,11 @@ MonoBehaviour:
   gravity: 0.5
   veloYLimit: -0.8
   wallSlideSpeed: 0.4
-  jumpForce: 18
+  jumpForce: 7
   jumpCooldown: 0.1
   fallFactor: 0.15
   audioClips: []
-  speed: 30
+  speed: 20
 --- !u!212 &212318076680041088
 SpriteRenderer:
   m_ObjectHideFlags: 1

@@ -55,18 +55,11 @@ public class PlayerController : MonoBehaviour {
         //{
         //    print("Crouch");
         //}
-        //if(input.Jump == 2)
-        //{
-        //    print("Jumped");
-        //}
-        //if(input.Jump == 1)
-        //{
-        //    print("Still jumping");
-        //}
         //if(input.Interact)
         //{
         //    print("Grab or throw");
         //}
+        HandleJump();
         Flip();
 	}
 
@@ -99,7 +92,6 @@ public class PlayerController : MonoBehaviour {
         velocity = new Vector3(input.Horizontal * speed * Time.fixedDeltaTime, velocity.y);
 
         CheckGrounded();
-        HandleJump();
         if (!bGrounded)
         {
             velocity.y -= gravity * Time.fixedDeltaTime;
@@ -298,18 +290,18 @@ public class PlayerController : MonoBehaviour {
         // Make the player fall less fast when still holding the jump button
         if (input.Jump == 1 && !bGrounded)
         {
-            velocity += new Vector3(0f, fallFactor * Time.fixedDeltaTime);
+            velocity += new Vector3(0f, fallFactor * Time.deltaTime);
         }
         // Make the player fall faster when not holding the jump button anymore
         else if (!bGrounded)
         {
-            velocity -= new Vector3(0f, fallFactor * Time.fixedDeltaTime);
+            velocity -= new Vector3(0f, fallFactor * Time.deltaTime);
         }
     }
 
     private void Jump()
     {
-        velocity += new Vector3(0f, jumpForce * Time.fixedDeltaTime);
+        velocity += new Vector3(0f, jumpForce * Time.deltaTime);
         bJumpable = false;
         StartCoroutine(JumpCooldown(jumpCooldown));
     }
