@@ -6,12 +6,14 @@ public class PlayerController : MonoBehaviour {
 
     private Vector3 velocity;
     private PlayerInput input;
+    private SpriteRenderer rend;
 
     [SerializeField] float speed = 3f;
 
 	// Use this for initialization
 	void Start () {
         input = GetComponent<PlayerInput>();
+        rend = GetComponent<SpriteRenderer>();
 	}
 	
 	// Update is called once per frame
@@ -38,5 +40,18 @@ public class PlayerController : MonoBehaviour {
         {
             print("Grab or throw");
         }
+        Flip();
 	}
+
+    private void Flip()
+    {
+        if(input.Horizontal < 0f)
+        {
+            rend.flipX = true;
+        }
+        else if(input.Horizontal > 0f)
+        {
+            rend.flipX = false;
+        }
+    }
 }
