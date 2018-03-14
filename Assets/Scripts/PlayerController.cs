@@ -5,8 +5,12 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour {
 
     [Header("Physics"), SerializeField] float gravity = 1f;
-    [SerializeField] float veloYLimit = 1f;
+    [SerializeField] float veloYLimit = -1f;
     [SerializeField] float wallSlideSpeed = 0.4f;
+
+    [SerializeField] float jumpForce = 1f;
+    [SerializeField] float jumpCooldown = 0.1f;
+    [SerializeField] float fallFactor = 0.2f;
 
     private Vector3 velocity;
     private PlayerInput input;
@@ -15,6 +19,7 @@ public class PlayerController : MonoBehaviour {
 
     [SerializeField] AudioClip[] audioClips;
 
+    private bool bJumpable = true;
     private bool bOnWall = false;
     private bool bGrounded = false;
 
@@ -42,26 +47,26 @@ public class PlayerController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        if(input.Dodge)
-        {
-            print("Dodge");
-        }
-        if(input.Crouch)
-        {
-            print("Crouch");
-        }
-        if(input.Jump == 2)
-        {
-            print("Jumped");
-        }
-        if(input.Jump == 1)
-        {
-            print("Still jumping");
-        }
-        if(input.Interact)
-        {
-            print("Grab or throw");
-        }
+        //if(input.Dodge)
+        //{
+        //    print("Dodge");
+        //}
+        //if(input.Crouch)
+        //{
+        //    print("Crouch");
+        //}
+        //if(input.Jump == 2)
+        //{
+        //    print("Jumped");
+        //}
+        //if(input.Jump == 1)
+        //{
+        //    print("Still jumping");
+        //}
+        //if(input.Interact)
+        //{
+        //    print("Grab or throw");
+        //}
         Flip();
 	}
 
@@ -70,8 +75,8 @@ public class PlayerController : MonoBehaviour {
         #region Raycast Initialization
 
         // Update all the different raycast hit values to calculate physics
-        rays.bottomRight = Physics2D.Raycast(transform.position + Vector3.right * 0.1f + Vector3.down * 0.4f, Vector2.down, 0.1f);
-        rays.bottomLeft = Physics2D.Raycast(transform.position + Vector3.right * -0.2f + Vector3.down * 0.4f, Vector2.down, 0.1f);
+        rays.bottomRight = Physics2D.Raycast(transform.position + Vector3.right * 0.1f + Vector3.down * 0.4f, Vector2.down, 0.2f);
+        rays.bottomLeft = Physics2D.Raycast(transform.position + Vector3.right * -0.2f + Vector3.down * 0.4f, Vector2.down, 0.2f);
 
         rays.upperRight = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.right * 0.4f, Vector2.left, 0.2f);
         rays.lowerRight = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.right * 0.4f, Vector2.left, 0.2f);
@@ -91,15 +96,16 @@ public class PlayerController : MonoBehaviour {
 
         #endregion
 
-        velocity = new Vector3(input.Horizontal, 0f);
+        velocity = new Vector3(input.Horizontal * speed * Time.fixedDeltaTime, velocity.y);
 
         CheckGrounded();
-
+        HandleJump();
         if (!bGrounded)
         {
-            velocity.y -= gravity;
+            velocity.y -= gravity * Time.fixedDeltaTime;
         }
 
+        CheckVelocity();
         transform.position += velocity;
     }
 
@@ -117,6 +123,12 @@ public class PlayerController : MonoBehaviour {
     /// </summary>
     private void CheckVelocity()
     {
+        // Check for ground under the player
+        if (bGrounded && velocity.y < 0)
+        {
+            velocity.y = 0;
+        }
+
         // Checking for colliders to the sides
         if (WallInWay())
         {
@@ -132,7 +144,7 @@ public class PlayerController : MonoBehaviour {
         // Check for possible Wallslide
         if (bOnWall && !bGrounded && HoldingInDirection() && velocity.y < 0)
         {
-            velocity.y = - wallSlideSpeed;
+            velocity.y = - wallSlideSpeed * Time.fixedDeltaTime;
         }
 
         // Check if something is above the player and let him bounce down again relative to the force he went up with
@@ -272,6 +284,44 @@ public class PlayerController : MonoBehaviour {
 
     #endregion
 
+    #region Jump
+
+    /// <summary>
+    /// Start the Jump process
+    /// </summary>
+    private void HandleJump()
+    {
+        if (input.Jump == 2 && bGrounded && bJumpable)
+        {
+            Jump();
+        }
+        // Make the player fall less fast when still holding the jump button
+        if (input.Jump == 1 && !bGrounded)
+        {
+            velocity += new Vector3(0f, fallFactor * Time.fixedDeltaTime);
+        }
+        // Make the player fall faster when not holding the jump button anymore
+        else if (!bGrounded)
+        {
+            velocity -= new Vector3(0f, fallFactor * Time.fixedDeltaTime);
+        }
+    }
+
+    private void Jump()
+    {
+        velocity += new Vector3(0f, jumpForce * Time.fixedDeltaTime);
+        bJumpable = false;
+        StartCoroutine(JumpCooldown(jumpCooldown));
+    }
+
+    IEnumerator JumpCooldown(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        bJumpable = true;
+    }
+
+    #endregion
+
     /// <summary>
     /// Checks if the player is on the ground or not
     /// </summary>
@@ -280,14 +330,12 @@ public class PlayerController : MonoBehaviour {
         // When the bottom left collider hit something tagged as ground
         if (RaycastForTag("Ground", rays.bottomLeft) || RaycastForTag("Ground", rays.bottomRight))
         {
-            print("Grounded");
             bGrounded = true;
             //anim.SetBool("Grounded", true);
         }
         // Otherwise the player is not grounded
         else
         {
-            print("Not grounded");
             bGrounded = false;
             //anim.SetBool("Grounded", false);
         }
