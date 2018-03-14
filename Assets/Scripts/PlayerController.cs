@@ -7,6 +7,7 @@ public class PlayerController : MonoBehaviour {
     [Header("Physics"), SerializeField] float gravity = 1f;
     [SerializeField] float veloYLimit = -1f;
     [SerializeField] float wallSlideSpeed = 0.4f;
+    private Vector3 pointToPullUpTo;
 
     [SerializeField] float jumpForce = 1f;
     [SerializeField] float jumpCooldown = 0.1f;
@@ -16,6 +17,8 @@ public class PlayerController : MonoBehaviour {
     private PlayerInput input;
     private SpriteRenderer rend;
     private AudioSource audioSource;
+
+    private GameObject grabbedObject;
 
     [SerializeField] AudioClip[] audioClips;
 
@@ -67,6 +70,10 @@ public class PlayerController : MonoBehaviour {
             rend.flipY = false;
         }
         HandleJump();
+        if(!bOnWall)
+        {
+            pointToPullUpTo = Vector3.zero;
+        }
         Flip();
 	}
 
@@ -193,7 +200,7 @@ public class PlayerController : MonoBehaviour {
     /// <returns> True if there is a wall. False when there is none</returns>
     private bool WallInWay()
     {
-        if (transform.localScale.x < 0)
+        if (rend.flipX == true)
         {
             if (RaycastForTag("Ground", rays.upperLeft, rays.lowerLeft))
             {
@@ -201,7 +208,7 @@ public class PlayerController : MonoBehaviour {
                 return true;
             }
         }
-        else if (transform.localScale.x > 0)
+        else if (rend.flipX == false)
         {
             if (RaycastForTag("Ground", rays.upperRight, rays.lowerRight))
             {
@@ -311,7 +318,19 @@ public class PlayerController : MonoBehaviour {
     {
         if (input.Jump == 2 && bGrounded && bJumpable)
         {
-            Jump();
+            if (!bOnWall)
+            {
+                Jump();
+            }
+            else if(bOnWall)
+            {
+                //Play pull up animation
+                RaycastHit2D hit = (RaycastHit2D)WhichRaycastForTag("Ground", rays.upperLeft, rays.lowerLeft, rays.lowerRight, rays.upperRight);
+                if(hit.collider != null)
+                {
+                    pointToPullUpTo = hit.collider.bounds.min;// - Vector3.left * hit.collider.bounds.extents.x/2;
+                }
+            }
         }
         // Make the player fall less fast when still holding the jump button
         if (input.Jump == 1 && !bGrounded)
