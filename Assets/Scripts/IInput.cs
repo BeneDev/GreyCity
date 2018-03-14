@@ -11,4 +11,8 @@ public interface IInput
     int Jump { get; }
 
     bool Dodge { get; }
+
+    bool Crouch { get; }
+
+    bool Interact { get; }
 }

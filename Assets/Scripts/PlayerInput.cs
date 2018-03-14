@@ -60,18 +60,42 @@ public class PlayerInput : MonoBehaviour, IInput
         }
     }
 
-    //// Looks for Input for Dodge
-    //public bool Dodge
-    //{
-    //    get
-    //    {
-    //        if (Input.GetButtonDown("Dodge"))
-    //        {
-    //            return true;
-    //        }
-    //        return false;
-    //    }
-    //}
+    // Looks for Input for Dodge
+    public bool Dodge
+    {
+        get
+        {
+            if (Input.GetButtonDown("Dodge"))
+            {
+                return true;
+            }
+            return false;
+        }
+    }
+
+    public bool Crouch
+    {
+        get
+        {
+            if(Input.GetButton("Crouch"))
+            {
+                return true;
+            }
+            return false;
+        }
+    }
+
+    public bool Interact
+    {
+        get
+        {
+            if(Input.GetButtonDown("Interact"))
+            {
+                return true;
+            }
+            return false;
+        }
+    }
 
     #endregion
 
