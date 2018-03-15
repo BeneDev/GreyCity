@@ -174,7 +174,7 @@ public class PlayerController : MonoBehaviour {
         {
             for (int i = 0; i < hits.Length - 1; i++)
             {
-                if (hits[i].collider.tag == "Ground")
+                if (hits[i].collider.tag == "Ground" || hits[i].collider.tag == "HideBehind")
                 {
                     return false;
                 }
