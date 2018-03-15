@@ -77,8 +77,10 @@ public class GeneralEnemy : MonoBehaviour
         }
         else
         {
-            bLookLeft = false;
+            BLookLeft = false;
         }
+        rend.receiveShadows = true;
+        rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
     }
 
     // Update is called once per frame
@@ -102,11 +104,11 @@ public class GeneralEnemy : MonoBehaviour
         toPlayer = player.transform.position - transform.position;
     }
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawRay(transform.position + new Vector3(coll.bounds.extents.x, 0.0f), Vector2.right * 0.2f);
-        Gizmos.DrawRay(transform.position + new Vector3(-coll.bounds.extents.x, 0.0f), Vector2.left * 0.2f);
-    }
+    //private void OnDrawGizmos()
+    //{
+    //    Gizmos.DrawRay(transform.position + new Vector3(coll.bounds.extents.x, 0.0f), Vector2.right * 0.2f);
+    //    Gizmos.DrawRay(transform.position + new Vector3(-coll.bounds.extents.x, 0.0f), Vector2.left * 0.2f);
+    //}
 
     /// <summary>
     /// Make the enemy turn around, whenever he faces the end of the platform he's walking on or a wall in front of him
@@ -118,7 +120,6 @@ public class GeneralEnemy : MonoBehaviour
         {
             if (rays.left || rays.upperLeft)
             {
-                print("Turn");
                 BLookLeft = true;
             }
         }
@@ -126,7 +127,6 @@ public class GeneralEnemy : MonoBehaviour
         {
             if (rays.right || rays.upperRight)
             {
-                print("Around");
                 BLookLeft = false;
             }
         }

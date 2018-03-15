@@ -10,13 +10,13 @@ public class PlayerController : MonoBehaviour {
     private float heightToPullUpTo;
 
     [SerializeField] float jumpForce = 1f;
-    [SerializeField] float jumpCooldown = 0.1f;
     [SerializeField] float fallFactor = 0.2f;
 
     private Vector3 velocity;
     private PlayerInput input;
     private SpriteRenderer rend;
     private AudioSource audioSource;
+    private LayerMask layersToCollideWith;
 
     private GameObject grabbedObject;
 
@@ -48,7 +48,16 @@ public class PlayerController : MonoBehaviour {
 	void Start () {
         input = GetComponent<PlayerInput>();
         rend = GetComponent<SpriteRenderer>();
-	}
+        // Get the layerMask for collision
+        int layer = LayerMask.NameToLayer("Ground");
+        int layer2 = LayerMask.NameToLayer("EnemiesLight");
+        layersToCollideWith = 1 << layer;
+        LayerMask layers2 = 1 << layer2;
+        layersToCollideWith = layersToCollideWith | layers2;
+
+        //Make shadows happen
+        rend.receiveShadows = true;
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -69,12 +78,20 @@ public class PlayerController : MonoBehaviour {
             bCrouching = false;
             rend.flipY = false;
         }
-        HandleJump();
         if(!bOnWall)
         {
             heightToPullUpTo = 0f;
         }
         Flip();
+        if(RaycastForTag("EnemyLight", anyRaycast))
+        {
+            RaycastHit2D hit = (RaycastHit2D)WhichRaycastForTag("EnemyLight", anyRaycast);
+            Vector3 direction = hit.collider.gameObject.transform.parent.transform.position;
+            if(Physics2D.Raycast(transform.position, direction, direction.magnitude).collider.gameObject.tag == "EnemyLight")
+            {
+                print("Detected");
+            }
+        }
 	}
 
     private void FixedUpdate()
@@ -82,18 +99,18 @@ public class PlayerController : MonoBehaviour {
         #region Raycast Initialization
 
         // Update all the different raycast hit values to calculate physics
-        rays.bottomRight = Physics2D.Raycast(transform.position + Vector3.right * 0.1f + Vector3.down * 0.4f, Vector2.down, 0.2f);
-        rays.bottomLeft = Physics2D.Raycast(transform.position + Vector3.right * -0.2f + Vector3.down * 0.4f, Vector2.down, 0.2f);
+        rays.bottomRight = Physics2D.Raycast(transform.position + Vector3.right * 0.1f + Vector3.down * 0.4f, Vector2.down, 0.2f, layersToCollideWith);
+        rays.bottomLeft = Physics2D.Raycast(transform.position + Vector3.right * -0.2f + Vector3.down * 0.4f, Vector2.down, 0.2f, layersToCollideWith);
 
-        rays.lowerRight = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.right * 0.4f, Vector2.left, 0.2f);
-        rays.lowerLeft = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.left * 0.4f, Vector2.right, 0.2f);
+        rays.lowerRight = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.right * 0.4f, Vector2.left, 0.2f, layersToCollideWith);
+        rays.lowerLeft = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.left * 0.4f, Vector2.right, 0.2f, layersToCollideWith);
 
         if (!bCrouching)
         {
-            rays.upperRight = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.right * 0.4f, Vector2.left, 0.2f);
-            rays.upperLeft = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.left * 0.4f, Vector2.right, 0.2f);
+            rays.upperRight = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.right * 0.4f, Vector2.left, 0.2f, layersToCollideWith);
+            rays.upperLeft = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.left * 0.4f, Vector2.right, 0.2f, layersToCollideWith);
 
-            rays.top = Physics2D.Raycast(transform.position + Vector3.up * 0.4f, Vector2.up, 0.2f);
+            rays.top = Physics2D.Raycast(transform.position + Vector3.up * 0.4f, Vector2.up, 0.2f, layersToCollideWith);
         }
         else
         {
@@ -125,6 +142,12 @@ public class PlayerController : MonoBehaviour {
         velocity = new Vector3(input.Horizontal * actualSpeed * Time.fixedDeltaTime, velocity.y);
 
         CheckGrounded();
+
+        if (!bCrouching)
+        {
+            HandleJump();
+        }
+
         if (!bGrounded)
         {
             velocity.y -= gravity * Time.fixedDeltaTime;
@@ -316,7 +339,7 @@ public class PlayerController : MonoBehaviour {
     /// </summary>
     private void HandleJump()
     {
-        if (input.Jump == 2 && bGrounded && bJumpable)
+        if (input.Jump == 2 && bGrounded)
         {
             if (!bOnWall)
             {
@@ -347,15 +370,7 @@ public class PlayerController : MonoBehaviour {
 
     private void Jump()
     {
-        velocity += new Vector3(0f, jumpForce * Time.deltaTime);
-        bJumpable = false;
-        StartCoroutine(JumpCooldown(jumpCooldown));
-    }
-
-    IEnumerator JumpCooldown(float seconds)
-    {
-        yield return new WaitForSeconds(seconds);
-        bJumpable = true;
+        velocity = new Vector3(0f, jumpForce * Time.deltaTime);
     }
 
     #endregion
