@@ -17,8 +17,11 @@ public class PlayerController : MonoBehaviour {
     private SpriteRenderer rend;
     private AudioSource audioSource;
     private LayerMask layersToCollideWith;
+    private LayerMask layersToInteractWith;
 
     private GameObject grabbedObject;
+
+    public bool test;
 
     [SerializeField] AudioClip[] audioClips;
 
@@ -26,6 +29,8 @@ public class PlayerController : MonoBehaviour {
     private bool bOnWall = false;
     private bool bGrounded = false;
     private bool bCrouching = false;
+
+    private Vector3 eyes;
 
     struct PlayerRaycasts // To store the informations of raycasts around the player to calculate physics
     {
@@ -52,8 +57,8 @@ public class PlayerController : MonoBehaviour {
         int layer = LayerMask.NameToLayer("Ground");
         int layer2 = LayerMask.NameToLayer("EnemiesLight");
         layersToCollideWith = 1 << layer;
-        LayerMask layers2 = 1 << layer2;
-        layersToCollideWith = layersToCollideWith | layers2;
+        layersToInteractWith = 1 << layer2;
+        layersToCollideWith = layersToCollideWith | layersToInteractWith;
 
         //Make shadows happen
         rend.receiveShadows = true;
@@ -83,16 +88,14 @@ public class PlayerController : MonoBehaviour {
             heightToPullUpTo = 0f;
         }
         Flip();
-        if(RaycastForTag("EnemyLight", anyRaycast))
+        if (RaycastForTag("EnemyLight", anyRaycast))
         {
-            RaycastHit2D hit = (RaycastHit2D)WhichRaycastForTag("EnemyLight", anyRaycast);
-            Vector3 direction = hit.collider.gameObject.transform.parent.transform.position;
-            if(Physics2D.Raycast(transform.position, direction, direction.magnitude).collider.gameObject.tag == "EnemyLight")
+            if(CheckForDetected())
             {
                 print("Detected");
             }
         }
-	}
+    }
 
     private void FixedUpdate()
     {
@@ -104,21 +107,11 @@ public class PlayerController : MonoBehaviour {
 
         rays.lowerRight = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.right * 0.4f, Vector2.left, 0.2f, layersToCollideWith);
         rays.lowerLeft = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.left * 0.4f, Vector2.right, 0.2f, layersToCollideWith);
+        
+        rays.upperRight = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.right * 0.4f, Vector2.left, 0.2f, layersToCollideWith);
+        rays.upperLeft = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.left * 0.4f, Vector2.right, 0.2f, layersToCollideWith);
 
-        if (!bCrouching)
-        {
-            rays.upperRight = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.right * 0.4f, Vector2.left, 0.2f, layersToCollideWith);
-            rays.upperLeft = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.left * 0.4f, Vector2.right, 0.2f, layersToCollideWith);
-
-            rays.top = Physics2D.Raycast(transform.position + Vector3.up * 0.4f, Vector2.up, 0.2f, layersToCollideWith);
-        }
-        else
-        {
-            rays.upperRight = Physics2D.Raycast(transform.position + Vector3.right * 0.4f, Vector2.left, 0.2f);
-            rays.upperLeft = Physics2D.Raycast(transform.position + Vector3.left * 0.4f, Vector2.right, 0.2f);
-
-            rays.top = Physics2D.Raycast(transform.position + Vector3.up * 0.1f, Vector2.up, 0.2f);
-        }
+        rays.top = Physics2D.Raycast(transform.position + Vector3.up * 0.4f, Vector2.up, 0.2f, layersToCollideWith);
 
         anyRaycast[0] = rays.bottomRight;
         anyRaycast[1] = rays.bottomLeft;
@@ -133,10 +126,13 @@ public class PlayerController : MonoBehaviour {
         if(bCrouching)
         {
             actualSpeed = speed / 4;
+            eyes = transform.position;
+
         }
         else
         {
             actualSpeed = speed;
+            eyes = new Vector3(transform.position.x, transform.position.y + 0.8f);
         }
 
         velocity = new Vector3(input.Horizontal * actualSpeed * Time.fixedDeltaTime, velocity.y);
@@ -148,6 +144,7 @@ public class PlayerController : MonoBehaviour {
             HandleJump();
         }
 
+        // Apply Gravity
         if (!bGrounded)
         {
             velocity.y -= gravity * Time.fixedDeltaTime;
@@ -165,6 +162,30 @@ public class PlayerController : MonoBehaviour {
 
 
     #region HelperMethods
+
+    private bool CheckForDetected()
+    {
+        RaycastHit2D hit = (RaycastHit2D)WhichRaycastForTag("EnemyLight", anyRaycast);
+        bool bDetected = false;
+        Vector3 direction = hit.collider.gameObject.transform.position - eyes;
+        RaycastHit2D[] hits = Physics2D.RaycastAll(eyes, direction, direction.magnitude);
+        Debug.DrawRay(eyes, direction);
+        if (hits.Length > 0)
+        {
+            for (int i = 0; i < hits.Length - 1; i++)
+            {
+                if (hits[i].collider.tag == "Ground")
+                {
+                    return false;
+                }
+                else if(hits[i].collider.tag == "EnemyLight")
+                {
+                    bDetected = true;
+                }
+            }
+        }
+        return bDetected;
+    }
 
     /// <summary>
     /// Make sure the velocity does not violate the laws of physics in this game
