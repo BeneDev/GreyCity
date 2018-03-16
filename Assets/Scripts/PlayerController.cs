@@ -16,6 +16,8 @@ public class PlayerController : MonoBehaviour {
     private PlayerInput input;
     private SpriteRenderer rend;
     private AudioSource audioSource;
+    private Camera cam;
+
     private LayerMask layersToCollideWith;
     private LayerMask layersToInteractWith;
 
@@ -53,6 +55,7 @@ public class PlayerController : MonoBehaviour {
 	void Start () {
         input = GetComponent<PlayerInput>();
         rend = GetComponent<SpriteRenderer>();
+        cam = Camera.main;
         // Get the layerMask for collision
         int layer = LayerMask.NameToLayer("Ground");
         int layer2 = LayerMask.NameToLayer("EnemiesLight");
@@ -92,8 +95,14 @@ public class PlayerController : MonoBehaviour {
         {
             if(CheckForDetected())
             {
-                print("Detected");
+                Die();
             }
+        }
+        // Detect Checkpoint in range and activate him
+        if (RaycastForTag("Checkpoint", anyRaycast))
+        {
+            RaycastHit2D newCheckpoint = (RaycastHit2D)WhichRaycastForTag("Checkpoint", anyRaycast);
+            GameManager.Instance.currentCheckpoint = newCheckpoint.collider.gameObject.transform.position;
         }
     }
 
@@ -105,13 +114,13 @@ public class PlayerController : MonoBehaviour {
         rays.bottomRight = Physics2D.Raycast(transform.position + Vector3.right * 0.1f + Vector3.down * 0.4f, Vector2.down, 0.2f, layersToCollideWith);
         rays.bottomLeft = Physics2D.Raycast(transform.position + Vector3.right * -0.2f + Vector3.down * 0.4f, Vector2.down, 0.2f, layersToCollideWith);
 
-        rays.lowerRight = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.right * 0.4f, Vector2.left, 0.2f, layersToCollideWith);
-        rays.lowerLeft = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.left * 0.4f, Vector2.right, 0.2f, layersToCollideWith);
+        rays.lowerRight = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.right * 0.4f, Vector2.left, 0.2f);
+        rays.lowerLeft = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.left * 0.4f, Vector2.right, 0.2f);
         
-        rays.upperRight = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.right * 0.4f, Vector2.left, 0.2f, layersToCollideWith);
-        rays.upperLeft = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.left * 0.4f, Vector2.right, 0.2f, layersToCollideWith);
+        rays.upperRight = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.right * 0.4f, Vector2.left, 0.2f);
+        rays.upperLeft = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.left * 0.4f, Vector2.right, 0.2f);
 
-        rays.top = Physics2D.Raycast(transform.position + Vector3.up * 0.4f, Vector2.up, 0.2f, layersToCollideWith);
+        rays.top = Physics2D.Raycast(transform.position + Vector3.up * 0.4f, Vector2.up, 0.2f);
 
         anyRaycast[0] = rays.bottomRight;
         anyRaycast[1] = rays.bottomLeft;
@@ -162,7 +171,22 @@ public class PlayerController : MonoBehaviour {
 
 
     #region HelperMethods
+    
+    private void Die()
+    {
+        gameObject.GetComponent<PlayerController>().enabled = false;
+        // Rotate the old player to show he ded
+        Quaternion newRotation = new Quaternion();
+        newRotation.eulerAngles = new Vector3(0f, 0f, 90f);
+        gameObject.transform.rotation = newRotation;
+        // Delete the reference to this Player in the cameraController
+        cam.GetComponentInParent<CameraController>().player = null;
+    }
 
+    /// <summary>
+    /// Check if the player is detected or if he is behind an object, blocking the view
+    /// </summary>
+    /// <returns></returns>
     private bool CheckForDetected()
     {
         RaycastHit2D hit = (RaycastHit2D)WhichRaycastForTag("EnemyLight", anyRaycast);
