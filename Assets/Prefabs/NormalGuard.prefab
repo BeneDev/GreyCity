@@ -213,7 +213,7 @@ Light:
   serializedVersion: 8
   m_Type: 0
   m_Color: {r: 0.9675456, g: 1, b: 0.7647059, a: 1}
-  m_Intensity: 60
+  m_Intensity: 40
   m_Range: 8.22
   m_SpotAngle: 35.7
   m_CookieSize: 10
@@ -250,7 +250,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8294af64d980f042a8b9ad6558ccaff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveSpeed: 3
+  moveSpeed: 1.5
 --- !u!212 &212094019832884740
 SpriteRenderer:
   m_ObjectHideFlags: 1
