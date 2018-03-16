@@ -7,8 +7,8 @@ public class CameraController : MonoBehaviour {
     public GameObject player;
 
 	// Use this for initialization
-	void Start () {
-        //player = GameObject.FindGameObjectWithTag("Player");
+	void Start() {
+        GameManager.Instance.OnPlayerChanged += GetNewPlayer;
 	}
 	
 	// Update is called once per frame
@@ -18,4 +18,9 @@ public class CameraController : MonoBehaviour {
             transform.position = player.transform.position;
         }
 	}
+
+    void GetNewPlayer(GameObject newPlayer)
+    {
+        player = newPlayer;
+    }
 }

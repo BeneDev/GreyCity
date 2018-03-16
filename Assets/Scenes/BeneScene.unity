@@ -477,6 +477,11 @@ Prefab:
       propertyPath: m_Name
       value: NormalGuard (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 114081142223591122, guid: 16a663ddfe9691441b3cc5e0ab805e58,
+        type: 2}
+      propertyPath: stoppingDistance
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 16a663ddfe9691441b3cc5e0ab805e58, type: 2}
   m_IsPrefabParent: 0
@@ -639,7 +644,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c8ea673023a7c464fabeecf9934c8e9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  player: {fileID: 0}
 --- !u!4 &1277107581 stripped
 Transform:
   m_PrefabParentObject: {fileID: 4831066944451966, guid: 4986fabf66c216241a963674d2f5e670,
@@ -942,7 +946,7 @@ ParticleSystem:
   moveWithTransform: 0
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 2
-  randomSeed: -543389736
+  randomSeed: -2084538199
   InitialModule:
     serializedVersion: 3
     enabled: 1

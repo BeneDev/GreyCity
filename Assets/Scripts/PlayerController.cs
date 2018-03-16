@@ -246,13 +246,14 @@ public class PlayerController : MonoBehaviour {
     private void Die()
     {
         heartBeatAudioSource.Stop();
+        gameObject.tag = "Untagged";
         // Rotate the old player to show he ded
         Quaternion newRotation = new Quaternion();
         newRotation.eulerAngles = new Vector3(0f, 0f, 90f);
         gameObject.transform.rotation = newRotation;
-        // Delete the reference to this Player in the cameraController
-        cam.GetComponentInParent<CameraController>().player = null;
         gameObject.GetComponent<PlayerController>().enabled = false;
+        // Delete the reference to this gameObject on the camera to cause the next player to get activated
+        cam.GetComponentInParent<CameraController>().player = null;
     }
 
     /// <summary>

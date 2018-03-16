@@ -10,8 +10,8 @@ public class GameManager : MonoBehaviour {
 
     private Queue<GameObject> characters = new Queue<GameObject>();
 
-    private Camera cam;
-    private GameObject lerpPlayer;
+    // Delegate for when the next player is on
+    public event System.Action<GameObject> OnPlayerChanged;
 
     // Make the GameManger Instance a Singleton 
     private void Awake()
@@ -31,8 +31,14 @@ public class GameManager : MonoBehaviour {
         {
             characters.Enqueue(player);
         }
-        cam = Camera.main;
-        lerpPlayer = GameObject.FindGameObjectWithTag("Rain");
+    }
+
+    private void Update()
+    {
+        if(Camera.main.GetComponentInParent<CameraController>().player == null)
+        {
+            GetNextPlayer();
+        }
     }
 
     public void GetNextPlayer()
@@ -41,25 +47,15 @@ public class GameManager : MonoBehaviour {
         {
             GameObject nextPlayer = (GameObject)characters.Dequeue();
             nextPlayer.GetComponent<PlayerController>().enabled = true;
-            cam.GetComponentInParent<CameraController>().player = nextPlayer;
-            lerpPlayer.GetComponent<LerpingAfterPlayer>().player = nextPlayer;
+            if (OnPlayerChanged != null)
+            {
+                OnPlayerChanged(nextPlayer);
+                print("NextPlayer");
+            }
         }
         else
         {
             print("Gameover");
         }
     }
-
-    // Use this for initialization
-    void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		if(cam.GetComponentInParent<CameraController>().player == null)
-        {
-            GetNextPlayer();
-        }
-	}
 }

@@ -76,24 +76,19 @@ public class GeneralEnemy : MonoBehaviour
     protected float durationUntilNotAlarmedCounter;
 
     [SerializeField] float moveSpeed = 1f;
+    [SerializeField] float stoppingDistance = 0.5f;
 
     #endregion
 
-    // Use this for initialization
-    void Start()
-    {
-
-    }
-
     protected virtual void GeneralInitialization()
     {
-        player = GameObject.FindGameObjectWithTag("Player");
         coll = GetComponent<BoxCollider2D>();
         // Get the layerMask for collision
         int layer = LayerMask.NameToLayer("Ground");
         layersToCollideWith = 1 << layer;
         rend = GetComponent<SpriteRenderer>();
-        if(transform.localScale.x == -1)
+        GameManager.Instance.OnPlayerChanged += GetNewPlayer;
+        if (transform.localScale.x == -1)
         {
             BLookLeft = true;
         }
@@ -123,7 +118,10 @@ public class GeneralEnemy : MonoBehaviour
         rays.upperRight = Physics2D.Raycast(transform.position + new Vector3(-coll.bounds.extents.x, 0.4f), Vector2.left, 0.2f, layersToCollideWith);
 
         #endregion
-        toPlayer = player.transform.position - transform.position;
+        if (player)
+        {
+            toPlayer = player.transform.position - transform.position;
+        }
         if(!bAlarmed)
         {
             SimpleMove();
@@ -148,11 +146,32 @@ public class GeneralEnemy : MonoBehaviour
     //    Gizmos.DrawRay(transform.position + new Vector3(-coll.bounds.extents.x, 0.0f), Vector2.left * 0.2f);
     //}
 
+    protected void GetNewPlayer(GameObject newPlayer)
+    {
+        print("Got it");
+        player = newPlayer;
+    }
+
     protected virtual void AlarmedBehavior()
     {
-        Quaternion newRotation = new Quaternion();
-        newRotation.eulerAngles = new Vector3(eyes.transform.rotation.x, eyes.transform.rotation.y, toPlayer.z);
-        eyes.transform.rotation = newRotation;
+        //Quaternion newRotation = Quaternion.LookRotation(toPlayer);
+        //newRotation.eulerAngles = new Vector3(newRotation.eulerAngles.x, 0f, newRotation.eulerAngles.z);
+        //eyes.transform.rotation = newRotation;
+        if (player)
+        {
+            if (toPlayer.x > 0)
+            {
+                BLookLeft = false;
+            }
+            else if (toPlayer.x < 0)
+            {
+                BLookLeft = true;
+            }
+            if (toPlayer.x > stoppingDistance || toPlayer.x < -stoppingDistance)
+            {
+                transform.position += new Vector3(moveSpeed * 2f * transform.localScale.x * Time.deltaTime, 0f);
+            }
+        }
     }
 
     /// <summary>
