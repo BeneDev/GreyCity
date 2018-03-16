@@ -10,9 +10,14 @@ public class PlaySoundRandomly : MonoBehaviour {
 
 
     private float counter;
-	
-	// Update is called once per frame
-	void Update () {
+
+    private void Awake()
+    {
+        counter = Random.Range(minTimeInBetween, maxTimeInBetween);
+    }
+
+    // Update is called once per frame
+    void Update () {
 		if(counter <= 0f)
         {
             audioSource.volume = Random.Range(0.2f, 1f);
