@@ -14,6 +14,7 @@ public class PlayerController : MonoBehaviour {
 
     [SerializeField] float speed = 3f;
     private float actualSpeed;
+    [SerializeField] float crouchSpeedPenalty = 0.15f;
 
     [SerializeField] float wallSlideSpeed = 0.4f;
     private float heightToPullUpTo;
@@ -189,9 +190,10 @@ public class PlayerController : MonoBehaviour {
 
         #endregion
 
+        // Make player move slower when crouching
         if(bCrouching)
         {
-            actualSpeed = speed / 4;
+            actualSpeed = speed * crouchSpeedPenalty;
             eyes = transform.position;
 
         }
