@@ -32,7 +32,7 @@ public class PlayerController : MonoBehaviour {
     [SerializeField] float detectionTime = 2f; // The amount of seconds it takes to get detected
     private float detectionCounter;
 
-    [SerializeField] AudioClip[] audioClips;
+    [SerializeField] AudioSource heartBeatAudioSource;
 
     private bool bJumpable = true;
     private bool bOnWall = false;
@@ -119,6 +119,11 @@ public class PlayerController : MonoBehaviour {
         Flip();
         if (RaycastForTag("EnemyLight", anyRaycast))
         {
+            heartBeatAudioSource.volume = 1f;
+            if (heartBeatAudioSource && !heartBeatAudioSource.isPlaying)
+            {
+                heartBeatAudioSource.Play();
+            }
             if(CheckForDetected())
             {
                 detectionCounter -= Time.deltaTime;
@@ -131,6 +136,15 @@ public class PlayerController : MonoBehaviour {
         // Count down the detection Counter when not in sight of a Guard
         else
         {
+            if (heartBeatAudioSource.isPlaying)
+            {
+                // Stop the audio source from playing
+                Coroutine fadingOut = StartCoroutine(FadeOut(heartBeatAudioSource, 1f));
+                if (fadingOut != null)
+                {
+                    StopCoroutine(fadingOut);
+                }
+            }
             if(detectionCounter < detectionTime)
             {
                 detectionCounter += Time.deltaTime / 2;
@@ -213,7 +227,22 @@ public class PlayerController : MonoBehaviour {
 
 
     #region HelperMethods
-    
+
+    IEnumerator FadeOut(AudioSource audioSource, float FadeTime)
+    {
+        float startVolume = audioSource.volume;
+
+        while(audioSource.volume > 0f)
+        {
+            audioSource.volume -= Time.deltaTime / 4;
+
+            yield return new WaitForEndOfFrame();
+        }
+        audioSource.Stop();
+        audioSource.volume = 1f;
+        yield break;
+    }
+
     private void Die()
     {
         gameObject.GetComponent<PlayerController>().enabled = false;
@@ -408,19 +437,6 @@ public class PlayerController : MonoBehaviour {
             yield return new WaitForEndOfFrame();
         }
         Time.timeScale = 1f;
-    }
-
-    /// <summary>
-    /// Play the element of the audioclip array at the indice given in as a parameter
-    /// </summary>
-    /// <param name="indice"></param>
-    private void PlayClip(int indice)
-    {
-        audioSource.clip = audioClips[indice];
-        if (!audioSource.isPlaying)
-        {
-            audioSource.Play();
-        }
     }
 
     #endregion
