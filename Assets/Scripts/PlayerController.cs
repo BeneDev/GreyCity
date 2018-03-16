@@ -245,13 +245,14 @@ public class PlayerController : MonoBehaviour {
 
     private void Die()
     {
-        gameObject.GetComponent<PlayerController>().enabled = false;
+        heartBeatAudioSource.Stop();
         // Rotate the old player to show he ded
         Quaternion newRotation = new Quaternion();
         newRotation.eulerAngles = new Vector3(0f, 0f, 90f);
         gameObject.transform.rotation = newRotation;
         // Delete the reference to this Player in the cameraController
         cam.GetComponentInParent<CameraController>().player = null;
+        gameObject.GetComponent<PlayerController>().enabled = false;
     }
 
     /// <summary>

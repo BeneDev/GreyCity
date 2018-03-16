@@ -11,6 +11,7 @@ public class GameManager : MonoBehaviour {
     private Queue<GameObject> characters = new Queue<GameObject>();
 
     private Camera cam;
+    private GameObject lerpPlayer;
 
     // Make the GameManger Instance a Singleton 
     private void Awake()
@@ -31,6 +32,7 @@ public class GameManager : MonoBehaviour {
             characters.Enqueue(player);
         }
         cam = Camera.main;
+        lerpPlayer = GameObject.FindGameObjectWithTag("Rain");
     }
 
     public void GetNextPlayer()
@@ -40,6 +42,7 @@ public class GameManager : MonoBehaviour {
             GameObject nextPlayer = (GameObject)characters.Dequeue();
             nextPlayer.GetComponent<PlayerController>().enabled = true;
             cam.GetComponentInParent<CameraController>().player = nextPlayer;
+            lerpPlayer.GetComponent<LerpingAfterPlayer>().player = nextPlayer;
         }
         else
         {
