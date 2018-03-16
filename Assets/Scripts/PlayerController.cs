@@ -4,13 +4,19 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
+    #region Fields
+
     [Header("Physics"), SerializeField] float gravity = 1f;
     [SerializeField] float veloYLimit = -1f;
-    [SerializeField] float wallSlideSpeed = 0.4f;
-    private float heightToPullUpTo;
 
     [SerializeField] float jumpForce = 1f;
     [SerializeField] float fallFactor = 0.2f;
+
+    [SerializeField] float speed = 3f;
+    private float actualSpeed;
+
+    [SerializeField] float wallSlideSpeed = 0.4f;
+    private float heightToPullUpTo;
 
     private Vector3 velocity;
     private PlayerInput input;
@@ -23,7 +29,8 @@ public class PlayerController : MonoBehaviour {
 
     private GameObject grabbedObject;
 
-    public bool test;
+    [SerializeField] float detectionTime = 2f; // The amount of seconds it takes to get detected
+    private float detectionCounter;
 
     [SerializeField] AudioClip[] audioClips;
 
@@ -48,11 +55,28 @@ public class PlayerController : MonoBehaviour {
 
     RaycastHit2D[] anyRaycast = new RaycastHit2D[7];
 
-    [SerializeField] float speed = 3f;
-    private float actualSpeed;
+    #endregion
 
-	// Use this for initialization
-	void Start () {
+    // Use this for initialization
+    //void Start () {
+    //    input = GetComponent<PlayerInput>();
+    //    rend = GetComponent<SpriteRenderer>();
+    //    cam = Camera.main;
+    //    // Get the layerMask for collision
+    //    int layer = LayerMask.NameToLayer("Ground");
+    //    int layer2 = LayerMask.NameToLayer("EnemiesLight");
+    //    layersToCollideWith = 1 << layer;
+    //    layersToInteractWith = 1 << layer2;
+    //    layersToCollideWith = layersToCollideWith | layersToInteractWith;
+
+    //    //Make shadows happen
+    //    rend.receiveShadows = true;
+
+    //    detectionCounter = detectionTime;
+    //}
+
+    private void OnEnable()
+    {
         input = GetComponent<PlayerInput>();
         rend = GetComponent<SpriteRenderer>();
         cam = Camera.main;
@@ -65,10 +89,12 @@ public class PlayerController : MonoBehaviour {
 
         //Make shadows happen
         rend.receiveShadows = true;
+
+        detectionCounter = detectionTime;
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+    // Update is called once per frame
+    void Update () {
         //if(input.Dodge)
         //{
         //    print("Dodge");
@@ -95,7 +121,23 @@ public class PlayerController : MonoBehaviour {
         {
             if(CheckForDetected())
             {
-                Die();
+                detectionCounter -= Time.deltaTime;
+                if(detectionCounter <= 0f)
+                {
+                    Die();
+                }
+            }
+        }
+        // Count down the detection Counter when not in sight of a Guard
+        else
+        {
+            if(detectionCounter < detectionTime)
+            {
+                detectionCounter += Time.deltaTime / 2;
+            }
+            else if(detectionCounter > detectionTime)
+            {
+                detectionCounter = detectionTime;
             }
         }
         // Detect Checkpoint in range and activate him
@@ -189,6 +231,7 @@ public class PlayerController : MonoBehaviour {
     /// <returns></returns>
     private bool CheckForDetected()
     {
+        GameObject enemyToAlarm = null;
         RaycastHit2D hit = (RaycastHit2D)WhichRaycastForTag("EnemyLight", anyRaycast);
         bool bDetected = false;
         Vector3 direction = hit.collider.gameObject.transform.position - eyes;
@@ -205,8 +248,13 @@ public class PlayerController : MonoBehaviour {
                 else if(hits[i].collider.tag == "EnemyLight")
                 {
                     bDetected = true;
+                    enemyToAlarm = hits[i].collider.gameObject;
                 }
             }
+        }
+        if(enemyToAlarm != null)
+        {
+            enemyToAlarm.GetComponentInParent<GeneralEnemy>().bAlarmed = true;
         }
         return bDetected;
     }

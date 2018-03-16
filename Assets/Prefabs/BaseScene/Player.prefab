@@ -141,19 +141,19 @@ MonoBehaviour:
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1346493512724392}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9064b6f4a5acb844287cb3d6fe6a4480, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   gravity: 0.5
   veloYLimit: -0.8
-  wallSlideSpeed: 2.5
   jumpForce: 18
   fallFactor: 0.15
-  test: 0
-  audioClips: []
   speed: 10
+  wallSlideSpeed: 2.5
+  detectionTime: 1
+  audioClips: []
 --- !u!212 &212318076680041088
 SpriteRenderer:
   m_ObjectHideFlags: 1

@@ -14,7 +14,6 @@ public class NormalGuard : GeneralEnemy
 	// Update is called once per frame
 	void Update () {
         GeneralBehavior();
-        SimpleMove();
 	}
 
 }

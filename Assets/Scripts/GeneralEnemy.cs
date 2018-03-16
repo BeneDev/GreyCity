@@ -53,6 +53,10 @@ public class GeneralEnemy : MonoBehaviour
 
     protected bool bLookLeft = false;
 
+    [SerializeField] GameObject eyes;
+
+    public bool bAlarmed = false;
+
     [SerializeField] float moveSpeed = 1f;
 
     #endregion
@@ -102,6 +106,14 @@ public class GeneralEnemy : MonoBehaviour
 
         #endregion
         toPlayer = player.transform.position - transform.position;
+        if(!bAlarmed)
+        {
+            SimpleMove();
+        }
+        else
+        {
+            AlarmedBehavior();
+        }
     }
 
     //private void OnDrawGizmos()
@@ -109,6 +121,13 @@ public class GeneralEnemy : MonoBehaviour
     //    Gizmos.DrawRay(transform.position + new Vector3(coll.bounds.extents.x, 0.0f), Vector2.right * 0.2f);
     //    Gizmos.DrawRay(transform.position + new Vector3(-coll.bounds.extents.x, 0.0f), Vector2.left * 0.2f);
     //}
+
+    protected virtual void AlarmedBehavior()
+    {
+        Quaternion newRotation = new Quaternion();
+        newRotation.eulerAngles = new Vector3(eyes.transform.rotation.x, eyes.transform.rotation.y, toPlayer.z);
+        eyes.transform.rotation = newRotation;
+    }
 
     /// <summary>
     /// Make the enemy turn around, whenever he faces the end of the platform he's walking on or a wall in front of him
