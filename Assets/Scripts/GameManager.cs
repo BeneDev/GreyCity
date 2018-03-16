@@ -35,7 +35,7 @@ public class GameManager : MonoBehaviour {
 
     private void Update()
     {
-        if(Camera.main.GetComponentInParent<CameraController>().player == null)
+        if(Camera.main.GetComponentInParent<FollowPlayer>().player == null)
         {
             GetNextPlayer();
         }

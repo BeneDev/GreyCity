@@ -253,7 +253,7 @@ public class PlayerController : MonoBehaviour {
         gameObject.transform.rotation = newRotation;
         gameObject.GetComponent<PlayerController>().enabled = false;
         // Delete the reference to this gameObject on the camera to cause the next player to get activated
-        cam.GetComponentInParent<CameraController>().player = null;
+        cam.GetComponentInParent<FollowPlayer>().player = null;
     }
 
     /// <summary>
