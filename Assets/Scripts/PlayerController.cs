@@ -17,6 +17,7 @@ public class PlayerController : MonoBehaviour {
 
     [SerializeField] float wallSlideSpeed = 0.4f;
     private float heightToPullUpTo;
+    private float fellThroughCounter = 0f;
 
     private Vector3 velocity;
     private PlayerInput input;
@@ -246,7 +247,6 @@ public class PlayerController : MonoBehaviour {
     private void Die()
     {
         heartBeatAudioSource.Stop();
-        gameObject.tag = "Untagged";
         // Rotate the old player to show he ded
         Quaternion newRotation = new Quaternion();
         newRotation.eulerAngles = new Vector3(0f, 0f, 90f);
@@ -497,11 +497,27 @@ public class PlayerController : MonoBehaviour {
     /// </summary>
     private void CheckGrounded()
     {
+        if(fellThroughCounter > 0f)
+        {
+            fellThroughCounter -= Time.fixedDeltaTime;
+        }
         // When the bottom left collider hit something tagged as ground
-        if (RaycastForTag("Ground", rays.bottomLeft) || RaycastForTag("Ground", rays.bottomRight))
+        if (RaycastForTag("Ground", rays.bottomLeft, rays.bottomRight))
         {
             bGrounded = true;
             //anim.SetBool("Grounded", true);
+        }
+        else if (RaycastForTag("GroundGate", rays.bottomRight, rays.bottomLeft))
+        {
+            if(input.Vertical >= 0 && fellThroughCounter <= 0f)
+            {
+                bGrounded = true;
+            }
+            else
+            {
+                bGrounded = false;
+                fellThroughCounter = 0.3f;
+            }
         }
         // Otherwise the player is not grounded
         else
