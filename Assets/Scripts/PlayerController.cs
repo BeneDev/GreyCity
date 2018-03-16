@@ -254,7 +254,7 @@ public class PlayerController : MonoBehaviour {
         }
         if(enemyToAlarm != null)
         {
-            enemyToAlarm.GetComponentInParent<GeneralEnemy>().bAlarmed = true;
+            enemyToAlarm.GetComponentInParent<GeneralEnemy>().BAlarmed = true;
         }
         return bDetected;
     }

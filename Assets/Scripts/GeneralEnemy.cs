@@ -27,6 +27,22 @@ public class GeneralEnemy : MonoBehaviour
         }
     }
 
+    public bool BAlarmed
+    {
+        get
+        {
+            return bAlarmed;
+        }
+        set
+        {
+            if(value == true)
+            {
+                durationUntilNotAlarmedCounter = durationUntilNotAlarmed;
+            }
+            bAlarmed = value;
+        }
+    }
+
     #endregion
 
     #region Fields
@@ -56,6 +72,8 @@ public class GeneralEnemy : MonoBehaviour
     [SerializeField] GameObject eyes;
 
     public bool bAlarmed = false;
+    [SerializeField] float durationUntilNotAlarmed = 3f;
+    protected float durationUntilNotAlarmedCounter;
 
     [SerializeField] float moveSpeed = 1f;
 
@@ -113,6 +131,14 @@ public class GeneralEnemy : MonoBehaviour
         else
         {
             AlarmedBehavior();
+        }
+        if(durationUntilNotAlarmedCounter > 0f)
+        {
+            durationUntilNotAlarmedCounter -= Time.deltaTime;
+        }
+        else if(durationUntilNotAlarmedCounter <= 0f && BAlarmed)
+        {
+            BAlarmed = false;
         }
     }
 
