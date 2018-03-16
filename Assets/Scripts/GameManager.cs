@@ -35,9 +35,16 @@ public class GameManager : MonoBehaviour {
 
     public void GetNextPlayer()
     {
-        GameObject nextPlayer = (GameObject)characters.Dequeue();
-        nextPlayer.GetComponent<PlayerController>().enabled = true;
-        cam.GetComponentInParent<CameraController>().player = nextPlayer;
+        if (characters.Count > 0)
+        {
+            GameObject nextPlayer = (GameObject)characters.Dequeue();
+            nextPlayer.GetComponent<PlayerController>().enabled = true;
+            cam.GetComponentInParent<CameraController>().player = nextPlayer;
+        }
+        else
+        {
+            print("Gameover");
+        }
     }
 
     // Use this for initialization
