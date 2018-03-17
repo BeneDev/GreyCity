@@ -160,8 +160,9 @@ public class GeneralEnemy : MonoBehaviour
             transform.position += new Vector3(moveSpeed * 0.75f * transform.localScale.x * Time.deltaTime, 0f);
             StartCoroutine(LeaveItAfterSeconds(timeToGiveUpAfter));
         }
-        else if (eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck) && !eyes.GetComponent<BoxCollider2D>().bounds.Contains(player.transform.position))
+        else if (eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck))
         {
+            print("Should look around now");
             StartCoroutine(LookAround());
         }
     }
