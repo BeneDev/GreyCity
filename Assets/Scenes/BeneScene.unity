@@ -546,10 +546,6 @@ Prefab:
       propertyPath: m_Name
       value: NormalGuard (3)
       objectReference: {fileID: 0}
-    - target: {fileID: 1089220793732252, guid: 16a663ddfe9691441b3cc5e0ab805e58, type: 2}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 16a663ddfe9691441b3cc5e0ab805e58, type: 2}
   m_IsPrefabParent: 0

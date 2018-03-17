@@ -105,12 +105,6 @@ public class GeneralEnemy : MonoBehaviour
         rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
     protected virtual void GeneralBehavior()
     {
         #region Raycast Initialization
@@ -137,26 +131,9 @@ public class GeneralEnemy : MonoBehaviour
         }
         else if(toPlayer != Vector3.zero)
         {
-            Vector3 toPoint = pointToCheck - transform.position;
-            if (toPoint.x > 0)
-            {
-                BLookLeft = false;
-            }
-            else if (toPoint.x < 0)
-            {
-                BLookLeft = true;
-            }
-            if (toPoint.x > stoppingDistance || toPoint.x < -stoppingDistance)
-            {
-                transform.position += new Vector3(moveSpeed * 2f * transform.localScale.x * Time.deltaTime, 0f);
-                StartCoroutine(LeaveItAfterSeconds(timeToGiveUpAfter));
-            }
-            if (eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck) && !eyes.GetComponent<BoxCollider2D>().bounds.Contains(player.transform.position))
-            {
-                pointToCheck = Vector3.zero;
-            }
+            StartCoroutine(AlertedBehavior());
         }
-        if(durationUntilNotDetectedCounter > 0f)
+        if (durationUntilNotDetectedCounter > 0f)
         {
             durationUntilNotDetectedCounter -= Time.deltaTime;
         }
@@ -165,6 +142,30 @@ public class GeneralEnemy : MonoBehaviour
             BDetected = false;
         }
     }
+
+    IEnumerator AlertedBehavior()
+    {
+        Vector3 toPoint = pointToCheck - transform.position;
+        if (toPoint.x > 0)
+        {
+            BLookLeft = false;
+        }
+        else if (toPoint.x < 0)
+        {
+            BLookLeft = true;
+        }
+        yield return new WaitForSeconds(1f);
+        if (toPoint.magnitude > stoppingDistance)
+        {
+            transform.position += new Vector3(moveSpeed * 0.75f * transform.localScale.x * Time.deltaTime, 0f);
+            StartCoroutine(LeaveItAfterSeconds(timeToGiveUpAfter));
+        }
+        else if (eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck) && !eyes.GetComponent<BoxCollider2D>().bounds.Contains(player.transform.position))
+        {
+            StartCoroutine(LookAround());
+        }
+    }
+    
 
     //private void OnDrawGizmos()
     //{
@@ -179,21 +180,27 @@ public class GeneralEnemy : MonoBehaviour
 
     protected void GetNewPlayer(GameObject newPlayer)
     {
-        print("Got it");
         player = newPlayer;
+    }
+
+    IEnumerator LookAround()
+    {
+        for (int t = 0; t < (int)Random.Range(3f, 5f); t++)
+        {
+            yield return new WaitForSeconds(Random.Range(1f, 2f));
+            BLookLeft = !BLookLeft;
+        }
+        pointToCheck = Vector3.zero;
     }
 
     IEnumerator LeaveItAfterSeconds(float seconds)
     {
         yield return new WaitForSeconds(seconds);
-        pointToCheck = Vector3.zero;
+        StartCoroutine(LookAround());
     }
 
     protected virtual void DetectedBehavior()
     {
-        //Quaternion newRotation = Quaternion.LookRotation(toPlayer);
-        //newRotation.eulerAngles = new Vector3(newRotation.eulerAngles.x, 0f, newRotation.eulerAngles.z);
-        //eyes.transform.rotation = newRotation;
         if (player)
         {
             if (toPlayer.x > 0)
@@ -204,7 +211,7 @@ public class GeneralEnemy : MonoBehaviour
             {
                 BLookLeft = true;
             }
-            if (toPlayer.x > stoppingDistance || toPlayer.x < -stoppingDistance)
+            if (toPlayer.magnitude > stoppingDistance)
             {
                 transform.position += new Vector3(moveSpeed * 2f * transform.localScale.x * Time.deltaTime, 0f);
             }

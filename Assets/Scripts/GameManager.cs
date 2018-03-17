@@ -50,7 +50,6 @@ public class GameManager : MonoBehaviour {
             if (OnPlayerChanged != null)
             {
                 OnPlayerChanged(nextPlayer);
-                print("NextPlayer");
             }
         }
         else
