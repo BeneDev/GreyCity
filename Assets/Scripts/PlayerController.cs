@@ -264,6 +264,11 @@ public class PlayerController : MonoBehaviour {
         Quaternion newRotation = new Quaternion();
         newRotation.eulerAngles = new Vector3(0f, 0f, 90f);
         gameObject.transform.rotation = newRotation;
+        // Make the enemy not detect player and stand still for some seconds
+        RaycastHit2D enemyWhoKilled = (RaycastHit2D)WhichRaycastForTag("EnemyLight", rays.detectRight, rays.detectLeft);
+        enemyWhoKilled.collider.gameObject.GetComponentInParent<GeneralEnemy>().BDetected = false;
+        enemyWhoKilled.collider.gameObject.GetComponentInParent<GeneralEnemy>().DontMoveForSeconds(5f);
+        // Disable the script
         gameObject.GetComponent<PlayerController>().enabled = false;
         // Delete the reference to this gameObject on the camera to cause the next player to get activated
         cam.GetComponentInParent<FollowPlayer>().player = null;

@@ -73,6 +73,8 @@ public class GeneralEnemy : MonoBehaviour
 
     protected bool bDetected = false;
 
+    protected bool bStandStill = false;
+
     Vector3 pointToCheck = Vector3.zero;
 
     [SerializeField] float durationUntilNotDetected = 3f;
@@ -121,7 +123,7 @@ public class GeneralEnemy : MonoBehaviour
         {
             toPlayer = player.transform.position - transform.position;
         }
-        if(!BDetected && pointToCheck == Vector3.zero)
+        if(!BDetected && pointToCheck == Vector3.zero && !bStandStill)
         {
             SimpleMove();
         }
@@ -129,7 +131,7 @@ public class GeneralEnemy : MonoBehaviour
         {
             DetectedBehavior();
         }
-        else if(toPlayer != Vector3.zero)
+        else if(pointToCheck != Vector3.zero)
         {
             StartCoroutine(AlertedBehavior());
         }
@@ -158,26 +160,45 @@ public class GeneralEnemy : MonoBehaviour
         if (!eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck))
         {
             transform.position += new Vector3(moveSpeed * 0.75f * transform.localScale.x * Time.deltaTime, 0f);
-            yield return new WaitForSeconds(timeToGiveUpAfter);
-            pointToCheck = Vector3.zero;
         }
-        else if (eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck))
+        if (eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck))
         {
-            yield return new WaitForSeconds(timeToGiveUpAfter/2);
-            //for (int i = 0; i < (int)Random.Range(2f, 5f); i++)
-            //{
-            //    print("found player");
-            //    BLookLeft = !BLookLeft;
-            //    yield return new WaitForSeconds(Random.Range(100f, 200f));
-            //}
-            BLookLeft = false;
-            yield return new WaitForSeconds(timeToGiveUpAfter/4);
-            BLookLeft = !BLookLeft;
-            yield return new WaitForSeconds(timeToGiveUpAfter / 2);
-            pointToCheck = Vector3.zero;
+            StartCoroutine(GiveUpAfterSeconds(timeToGiveUpAfter));
         }
+        //else if (eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck))
+        //{
+        //    yield return new WaitForSeconds(timeToGiveUpAfter/2);
+        //    //for (int i = 0; i < (int)Random.Range(2f, 5f); i++)
+        //    //{
+        //    //    print("found player");
+        //    //    BLookLeft = !BLookLeft;
+        //    //    yield return new WaitForSeconds(Random.Range(100f, 200f));
+        //    //}
+        //    BLookLeft = false;
+        //    yield return new WaitForSeconds(timeToGiveUpAfter/4);
+        //    BLookLeft = !BLookLeft;
+        //    yield return new WaitForSeconds(timeToGiveUpAfter / 2);
+        //    pointToCheck = Vector3.zero;
+        //}
     }
     
+    IEnumerator GiveUpAfterSeconds(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        pointToCheck = Vector3.zero;
+    }
+
+    public void DontMoveForSeconds(float seconds)
+    {
+        bStandStill = true;
+        StartCoroutine(WaitForMoveAgain(seconds));
+    }
+
+    IEnumerator WaitForMoveAgain(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        bStandStill = false;
+    }
 
     //private void OnDrawGizmos()
     //{
