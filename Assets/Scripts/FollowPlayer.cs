@@ -2,23 +2,31 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+/// <summary>
+/// Attach this script to a game object to make it follow the currently activated player
+/// </summary>
 public class FollowPlayer : MonoBehaviour {
 
     public GameObject player;
-
-	// Use this for initialization
+    
 	void Start() {
+        // Subscribe to the delegate of the gamemaker, broadcasting when a new player is activated
         GameManager.Instance.OnPlayerChanged += GetNewPlayer;
 	}
 	
-	// Update is called once per frame
 	void Update () {
+        // Follow the player if there is one referenced in the field
         if (player)
         {
             transform.position = player.transform.position;
         }
 	}
 
+    /// <summary>
+    /// The method subscribed to the Game Maker instance for changes to the currently activated player
+    /// </summary>
+    /// <param name="newPlayer"></param>
     void GetNewPlayer(GameObject newPlayer)
     {
         player = newPlayer;

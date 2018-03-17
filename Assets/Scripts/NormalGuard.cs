@@ -2,18 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// The actual script on normal guards
+/// </summary>
 public class NormalGuard : GeneralEnemy
 {
 
-
-	// Use this for initialization
 	void Start () {
         GeneralInitialization();
 	}
 	
-	// Update is called once per frame
 	void Update () {
         GeneralBehavior();
 	}
-
 }

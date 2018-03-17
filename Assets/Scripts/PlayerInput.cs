@@ -60,7 +60,7 @@ public class PlayerInput : MonoBehaviour, IInput
         }
     }
 
-    // Looks for Input for Dodge
+    // Look for Input for Dodge
     public bool Shout
     {
         get
@@ -73,6 +73,7 @@ public class PlayerInput : MonoBehaviour, IInput
         }
     }
 
+    // Look for Input for Crouching
     public bool Crouch
     {
         get
@@ -85,6 +86,7 @@ public class PlayerInput : MonoBehaviour, IInput
         }
     }
 
+    // Look for Input for Interacting with objects
     public bool Interact
     {
         get

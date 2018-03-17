@@ -7,6 +7,7 @@ public class GeneralEnemy : MonoBehaviour
 
     #region Properties
 
+    // Stores if the enemy is looking to the left or not
     bool BLookLeft
     {
         get
@@ -27,6 +28,7 @@ public class GeneralEnemy : MonoBehaviour
         }
     }
 
+    // Stores if the Enemy has detected the player
     public bool BDetected
     {
         get
@@ -43,6 +45,7 @@ public class GeneralEnemy : MonoBehaviour
         }
     }
 
+    // Stores the point the enemy is drawn to, because he heard something from there
     public Vector3 PointToCheck
     {
         get
@@ -59,20 +62,30 @@ public class GeneralEnemy : MonoBehaviour
 
     #region Fields
 
+    [Header("Movement"), SerializeField] float moveSpeed = 1f; // The normal movement speed of the enemy
+    [SerializeField] float stoppingDistance = 0.5f; // The distance, the enemy keeps to his targets
+
+    [Header("Timer"), SerializeField] float durationUntilNotDetected = 3f; // The amount of time it takes after the enemy lost sight to the player, to return back to normal movement
+    protected float durationUntilNotDetectedCounter; // The actual timer to tick down after the enemy lost sight to the player
+    [SerializeField] float timeToGiveUpAfter = 6f; // The amount of seconds after which the enemy will give up to look for the point where the alerting sound came from
+
+    [Header("The Eyes"), SerializeField] GameObject eyes; // Stores the Gameobject which has the collider, defining the sight of the enemy
+
+    // Variables to find the player
     protected GameObject player;
     protected Vector3 toPlayer;
 
-    // The layer mask used to collide with only walls
-    protected LayerMask layersToCollideWith;
-    protected LayerMask layersBlockingView;
+    // The layer mask to check collision and if sight to the player is blocked
+    protected LayerMask layersToCollideWith; // The enemy will collide with those. This will be the Ground Layer
+    protected LayerMask layersBlockingView; // These layers will block the view of the enemy. This will be the Ground and the default Layer
+
+    // Components needed to store
     protected BoxCollider2D coll;
     protected SpriteRenderer rend;
 
+    // Raycasts to move accordingly in the scene
     struct Raycasts
     {
-        public RaycastHit2D bottomLeft;
-        public RaycastHit2D bottomMid;
-        public RaycastHit2D bottomRight;
         public RaycastHit2D left;
         public RaycastHit2D right;
         public RaycastHit2D upperLeft;
@@ -80,41 +93,38 @@ public class GeneralEnemy : MonoBehaviour
     }
     private Raycasts rays;
 
-    protected bool bLookLeft = false;
+    // Booleans storing informations about the enemy
+    protected bool bLookLeft = false;   // Stores if the enemy looks to the left
+    protected bool bDetected = false; // Stores if this enemy detected the player
+    protected bool bPlayerInSight = false; // Stores wether the player is in sight or not
 
-    [SerializeField] GameObject eyes;
+    Vector3 pointToCheck = Vector3.zero; // The point to walk to if it is set
 
-    protected bool bDetected = false;
-
-    protected bool bPlayerInSight = false;
-
-    Vector3 pointToCheck = Vector3.zero;
-
-    [SerializeField] float durationUntilNotDetected = 3f;
-    protected float durationUntilNotDetectedCounter;
-
-    [SerializeField] float timeToGiveUpAfter = 6f; // The amount of seconds after which the enemy will give up to look for the point where the alerting sound came from
-
-    [SerializeField] float moveSpeed = 1f;
-    [SerializeField] float stoppingDistance = 0.5f;
-
-    [Header("Sound"), SerializeField] AudioSource alarmSound;
-    protected float alarmSoundVolume;
+    [Header("Sound"), SerializeField] AudioSource alarmSound; // The alarm sound to player when this enemy detected a player
+    protected float alarmSoundVolume; // The alarm sound volume stored, to set it to this volume after the sound was fading out
 
     #endregion
 
+    /// <summary>
+    /// This method gets called by the derived scripts in the Start method
+    /// </summary>
     protected virtual void GeneralInitialization()
     {
+        // Get needed Components
         coll = GetComponent<BoxCollider2D>();
-        // Get all layermasks
+        rend = GetComponent<SpriteRenderer>();
+        // Get needed LayerMasks
         int groundLayer = LayerMask.NameToLayer("Ground");
         int defaultLayer = LayerMask.NameToLayer("Default");
         layersToCollideWith = 1 << groundLayer;
         layersBlockingView = 1 << groundLayer;
         LayerMask defaultMask = 1 << defaultLayer;
         layersBlockingView = layersBlockingView | defaultMask;
-        rend = GetComponent<SpriteRenderer>();
+
+        // Subscribe to the Game Managers Delegate, broadcasting every new player
         GameManager.Instance.OnPlayerChanged += GetNewPlayer;
+
+        // Set the look left value according to the local scale
         if (transform.localScale.x == -1)
         {
             BLookLeft = true;
@@ -123,16 +133,18 @@ public class GeneralEnemy : MonoBehaviour
         {
             BLookLeft = false;
         }
-        rend.receiveShadows = true;
-        rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+        // Get the inital alarm sound volume
         alarmSoundVolume = alarmSound.volume;
     }
 
+    /// <summary>
+    /// This method gets called by the derived scripts in the update method
+    /// </summary>
     protected virtual void GeneralBehavior()
     {
         #region Raycast Initialization
 
-        // Update all of the rays, used to check for ground under the enemy
+        // Update all of the rays, used to check for walls besides the enemy
         rays.left = Physics2D.Raycast(transform.position + new Vector3(coll.bounds.extents.x, 0.0f), Vector2.right, 0.2f, layersToCollideWith);
         rays.right = Physics2D.Raycast(transform.position + new Vector3(-coll.bounds.extents.x, 0.0f), Vector2.left, 0.2f, layersToCollideWith);
 
@@ -140,6 +152,7 @@ public class GeneralEnemy : MonoBehaviour
         rays.upperRight = Physics2D.Raycast(transform.position + new Vector3(-coll.bounds.extents.x, 0.4f), Vector2.left, 0.2f, layersToCollideWith);
 
         #endregion
+        // Update the Vector, pointing towards the player and the field which stores if the player is in sight or not
         if (player)
         {
             toPlayer = player.transform.position - transform.position;
@@ -152,10 +165,12 @@ public class GeneralEnemy : MonoBehaviour
                 bPlayerInSight = false;
             }
         }
+        // When the player is not detected and there is no point to be drawn towards, simply patrol
         if(!BDetected && pointToCheck == Vector3.zero)
         {
             SimpleMove();
         }
+        // When the player is in sight and there is nothing blocking the view, the player is detected
         if (bPlayerInSight)
         {
             if (CheckForDetected())
@@ -163,6 +178,7 @@ public class GeneralEnemy : MonoBehaviour
                 BDetected = true;
             }
         }
+        // When the player is detected, play the alarm sound and behave the way its supposed to when the player is detected 
         if(BDetected)
         {
             if (!alarmSound.isPlaying)
@@ -171,8 +187,10 @@ public class GeneralEnemy : MonoBehaviour
             }
             DetectedBehavior();
         }
+        // When the player is not detected and the alarm sound is playing, let it fade out
         else
         {
+            // TODO wait a given time before fading out the alarm sound(make it player after the enemy looked around)
             if (alarmSound.isPlaying)
             {
                 // Stop the audio source from playing
@@ -183,10 +201,12 @@ public class GeneralEnemy : MonoBehaviour
                 }
             }
         }
+        // When the player is not detected, but there is a point of interest(caused by noise from there) behave accordingly and travel towards that point
         if (!BDetected && pointToCheck != Vector3.zero)
         {
             StartCoroutine(AlertedBehavior());
         }
+        // Count down the timer until the player is not detected anymore
         if (durationUntilNotDetectedCounter > 0f)
         {
             durationUntilNotDetectedCounter -= Time.deltaTime;
@@ -198,84 +218,18 @@ public class GeneralEnemy : MonoBehaviour
         }
     }
 
-    IEnumerator AlertedBehavior()
-    {
-        Vector3 toPoint = pointToCheck - transform.position;
-        if (toPoint.x > 0)
-        {
-            BLookLeft = false;
-        }
-        else if (toPoint.x < 0)
-        {
-            BLookLeft = true;
-        }
-        yield return new WaitForSeconds(1f);
-        if (!eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck))
-        {
-            transform.position += new Vector3(moveSpeed * 0.75f * transform.localScale.x * Time.deltaTime, 0f);
-            StartCoroutine(GiveUpAfterSeconds(timeToGiveUpAfter));
-        }
-        else
-        {
-            // TODO Look Around now
-        }
-    }
-    
-    IEnumerator GiveUpAfterSeconds(float seconds)
-    {
-        yield return new WaitForSeconds(seconds);
-        pointToCheck = Vector3.zero;
-    }
+    #region Helper Methods
 
-    IEnumerator FadeOut(AudioSource audioSource, float FadeTime)
-    {
-        while (audioSource.volume > 0f)
-        {
-            audioSource.volume -= Time.deltaTime / 4;
+    #region Behaviors
 
-            yield return new WaitForEndOfFrame();
-        }
-        audioSource.Stop();
-        audioSource.volume = alarmSoundVolume;
-        yield break;
-    }
-
-    private bool CheckForDetected()
-    {
-        Vector3 direction = player.GetComponent<PlayerController>().PlayerEyes - eyes.transform.position;
-        Debug.DrawRay(eyes.transform.position, direction);
-        //RaycastHit2D[] hits = Physics2D.RaycastAll(eyes.transform.position, direction, direction.magnitude, layersToCollideWith);
-        //if (hits.Length > 0)
-        //{
-        //    for (int i = 0; i < hits.Length - 1; i++)
-        //    {
-        //        print(hits[i].collider.tag);
-        //        if (hits[i].collider.tag == "Ground" || hits[i].collider.tag == "HideBehind")
-        //        {
-        //            return false;
-        //        }
-        //    }
-        //}
-        //print("So detected");
-        //return true;
-        if (Physics2D.Raycast(eyes.transform.position, direction, direction.magnitude, layersBlockingView))
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
-
-    protected void GetNewPlayer(GameObject newPlayer)
-    {
-        player = newPlayer;
-    }
-
+    /// <summary>
+    /// How the enemy behaves when he has seen the player
+    /// </summary>
     protected virtual void DetectedBehavior()
     {
+        // Tick down the detection counter of the player, killing him when he stays in sight for too long
         player.GetComponent<PlayerController>().DetectionCounter -= Time.deltaTime;
+        // Walk towards the player when he is farther away than the stopping distance 
         if (player)
         {
             if (toPlayer.x > 0)
@@ -298,7 +252,7 @@ public class GeneralEnemy : MonoBehaviour
     /// </summary>
     protected virtual void SimpleMove()
     {
-        // When the enemy has walls either to the right or left side of him
+        // When the enemy has walls either to the right or left side of him turn away from the wall
         if (!BLookLeft)
         {
             if (rays.left || rays.upperLeft)
@@ -316,5 +270,103 @@ public class GeneralEnemy : MonoBehaviour
         // Applies the movement after all the checks above
         transform.position += new Vector3(moveSpeed * transform.localScale.x * Time.deltaTime, 0f);
     }
+
+    /// <summary>
+    /// How the enemy behaves when he was alerted by a sound he heard
+    /// </summary>
+    /// <returns></returns>
+    IEnumerator AlertedBehavior()
+    {
+        // Get a vector3 towards the point, which was the source to alert the enenmy
+        Vector3 toPoint = pointToCheck - transform.position;
+        // Turn towards the point 
+        if (toPoint.x > 0)
+        {
+            BLookLeft = false;
+        }
+        else if (toPoint.x < 0)
+        {
+            BLookLeft = true;
+        }
+        // Wait a seconds before the enemy will carefully walk towards the point
+        yield return new WaitForSeconds(1f);
+        if (!eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck))
+        {
+            transform.position += new Vector3(moveSpeed * 0.75f * transform.localScale.x * Time.deltaTime, 0f);
+            // Give up after a given time, when you cant get to the point
+            StartCoroutine(GiveUpAfterSeconds(timeToGiveUpAfter));
+        }
+        // Otherwise, when you are at the point, look around to find the player
+        else
+        {
+            // TODO Look Around now
+        }
+    }
+
+    #endregion
+
+    /// <summary>
+    /// Make the enemy give up the searching for the source of a sound he hears
+    /// </summary>
+    /// <param name="seconds"></param>
+    /// <returns></returns>
+    IEnumerator GiveUpAfterSeconds(float seconds)
+    {
+        // Wait for given seconds until the point to walk to is reset to being zero
+        yield return new WaitForSeconds(seconds);
+        pointToCheck = Vector3.zero;
+    }
+
+    /// <summary>
+    /// Checks if the player is in sight or if the sight is blocked by objects
+    /// </summary>
+    /// <returns></returns>
+    private bool CheckForDetected()
+    {
+        // When there is anything of the layers which block the view in the way to the player, return false, otherwise true
+        Vector3 direction = player.GetComponent<PlayerController>().PlayerEyes - eyes.transform.position;
+        Debug.DrawRay(eyes.transform.position, direction);
+        if (Physics2D.Raycast(eyes.transform.position, direction, direction.magnitude, layersBlockingView))
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// Makes the sound fade out over the given time
+    /// </summary>
+    /// <param name="audioSource"></param>
+    /// <param name="FadeTime"></param>
+    /// <returns></returns>
+    IEnumerator FadeOut(AudioSource audioSource, float FadeTime)
+    {
+        // Let the sound fade out over the given time
+        while (audioSource.volume > 0f)
+        {
+            audioSource.volume -= Time.deltaTime / 4;
+
+            yield return new WaitForEndOfFrame();
+        }
+        // Stop the audio source from playing and resets the volume
+        audioSource.Stop();
+        audioSource.volume = alarmSoundVolume;
+        yield break;
+    }
+
+    /// <summary>
+    /// The method which is subscribed to the Game Manager On Player Change Delegate
+    /// </summary>
+    /// <param name="newPlayer"></param>
+    protected void GetNewPlayer(GameObject newPlayer)
+    {
+        player = newPlayer;
+    }
+
+    #endregion
+
 }
 

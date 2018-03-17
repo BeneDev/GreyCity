@@ -2,10 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// The Script to control the player
+/// </summary>
 public class PlayerController : MonoBehaviour {
 
     #region Properties
 
+    // Just returns the position of the players eyes to make it available for other scripts to read
     public Vector3 PlayerEyes
     {
         get
@@ -14,6 +18,7 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
+    // Makes the detectionCounter available to read and write for other scripts
     public float DetectionCounter
     {
         get
@@ -31,44 +36,47 @@ public class PlayerController : MonoBehaviour {
     #region Fields
 
     [Header("Physics"), SerializeField] float gravity = 1f;
-    [SerializeField] float veloYLimit = -1f;
+    [SerializeField] float veloYLimit = -1f; // The player cant fall faster than that
+    [SerializeField] float jumpForce = 1f; // The force which is applied to the player when he is jumping
+    [SerializeField] float fallFactor = 0.2f; // The force which, either gets subtracted when the player does not hold the jump button anymore when being in the air or which gets added when he is actually still holding the jump button
 
-    [SerializeField] float jumpForce = 1f;
-    [SerializeField] float fallFactor = 0.2f;
+    [Header("Speed Values"), SerializeField] float speed = 3f; // The normal speed which is used to calculate the actual speed
+    private float actualSpeed; // The actual speed with which the player travels
+    [SerializeField] float crouchSpeedPenalty = 0.15f; // The factor which is applied to the normal speed when crouching
+    [SerializeField] float wallSlideSpeed = 0.4f; // The speed of which the player falls down when pressing against a wall
 
-    [Header("Speed Values"), SerializeField] float speed = 3f;
-    private float actualSpeed;
-    [SerializeField] float crouchSpeedPenalty = 0.15f;
+    private float heightToPullUpTo; // The height of the object standing in front of when pressing jump. Most likely used for the pull up animation later
+    private float fellThroughCounter = 0f; // The timer to tick down when the player fell through a ground gate. This prevents the player from getting stuck in the ground gate if he instantly let go of holding the left stick down
+    private Vector3 velocity; // The field storing the velocity over the fixed update circle. This is applied to the transform position in the end after it got checked for validity
 
-    [SerializeField] float wallSlideSpeed = 0.4f;
-    private float heightToPullUpTo;
-    private float fellThroughCounter = 0f;
-
-    private Vector3 velocity;
+    // Components the player needs to store
     private PlayerInput input;
     private SpriteRenderer rend;
     private AudioSource audioSource;
+
     private Camera cam;
 
-    private LayerMask layersToCollideWith;
-    private LayerMask layersToInteractWith;
+    // Several LayerMasks
+    private LayerMask layersToCollideWith; // This will be the ground layer
+    private LayerMask layersDetectingThePlayer; // This will be the enemies light layer
 
-    private GameObject grabbedObject;
+    private GameObject grabbedObject; // The currently hold object is stored in here
 
-    [Header("Ranges"), SerializeField] float shoutRange = 50f;
-    [SerializeField] float stepRange = 1f;
+    [Header("Ranges"), SerializeField] float shoutRange = 50f; // The radius of the circle, to reach enemies and alert them when shouting
+    [SerializeField] float stepRange = 1f; // The radius of the circle, to reach enemies and alert them when not crouching
 
     [Header("Timer"), SerializeField] float detectionTime = 2f; // The amount of seconds it takes to get detected
-    private float detectionCounter;
+    private float detectionCounter; // The acutal counter ticking down the seconds it takes to get detected
 
-    [Header("Sound"), SerializeField] AudioSource heartBeatAudioSource;
+    [Header("Sound"), SerializeField] AudioSource heartBeatAudioSource; // The audio Source which stores the heart beat sound
 
+    // All the booleans to store informations about the player 
     private bool bJumpable = true;
     private bool bOnWall = false;
     private bool bGrounded = false;
     private bool bCrouching = false;
 
-    private Vector3 eyes;
+    private Vector3 eyes; // The position of the eyes of the player
 
     struct PlayerRaycasts // To store the informations of raycasts around the player to calculate physics
     {
@@ -84,51 +92,34 @@ public class PlayerController : MonoBehaviour {
     }
     PlayerRaycasts rays;
 
-    RaycastHit2D[] anyRaycast = new RaycastHit2D[7];
+    RaycastHit2D[] anyPhysicsRaycast = new RaycastHit2D[7]; // Any Raycast used for the Physics collision
 
     #endregion
 
-    // Use this for initialization
-    //void Start () {
-    //    input = GetComponent<PlayerInput>();
-    //    rend = GetComponent<SpriteRenderer>();
-    //    cam = Camera.main;
-    //    // Get the layerMask for collision
-    //    int layer = LayerMask.NameToLayer("Ground");
-    //    int layer2 = LayerMask.NameToLayer("EnemiesLight");
-    //    layersToCollideWith = 1 << layer;
-    //    layersToInteractWith = 1 << layer2;
-    //    layersToCollideWith = layersToCollideWith | layersToInteractWith;
-
-    //    //Make shadows happen
-    //    rend.receiveShadows = true;
-
-    //    detectionCounter = detectionTime;
-    //}
-
+    // Initializes the fields when the script is being enabled
     private void OnEnable()
     {
+        // Get the components of the player to use
         input = GetComponent<PlayerInput>();
         rend = GetComponent<SpriteRenderer>();
+        // Get the camera to delete this object from the player field there, when this character died
         cam = Camera.main;
         // Get the layerMask for collision
         int layerGround = LayerMask.NameToLayer("Ground");
         int layerEnemyLight = LayerMask.NameToLayer("EnemiesLight");
         layersToCollideWith = 1 << layerGround;
-        layersToInteractWith = 1 << layerEnemyLight;
+        layersDetectingThePlayer = 1 << layerEnemyLight;
 
-        //Make shadows happen
-        rend.receiveShadows = true;
-
+        // Set the detection counter to the time it takes to die after being detected
         detectionCounter = detectionTime;
     }
-
-    // Update is called once per frame
+    
     void Update () {
         //if(input.Interact)
         //{
         //    print("Grab or throw");
         //}
+        // Go in Crouching mode for as long as the player holds the button
         if (input.Crouch)
         {
             Crouch();
@@ -138,39 +129,41 @@ public class PlayerController : MonoBehaviour {
             bCrouching = false;
             rend.flipY = false;
         }
+        // When the player is not on a wall, there is nothing to pull up to
         if(!bOnWall)
         {
             heightToPullUpTo = 0f;
         }
+        // Flip the sprite in the direction of travel
         Flip();
+        // When the player is in the sight of an enemy
         if (RaycastForTag("EnemyLight", rays.detectRight, rays.detectLeft))
         {
+            // Make the hearbeat sound go
             heartBeatAudioSource.volume = 1f;
             if (heartBeatAudioSource && !heartBeatAudioSource.isPlaying)
             {
                 heartBeatAudioSource.Play();
             }
-            else if(detectionCounter < detectionTime * 0.75f)
-            {
-                detectionCounter -= Time.deltaTime;
-            }
+            // Die when the detection counter ticked down
             if (detectionCounter <= 0f)
             {
                 Die();
             }
         }
-        // Count down the detection Counter when not in sight of a Guard
+        // When not in sight of an enemy
         else if(!RaycastForTag("EnemyLight", rays.detectLeft, rays.detectRight))
         {
+            // Fade out the heartbeat sound
             if (heartBeatAudioSource.isPlaying)
             {
-                // Stop the audio source from playing
                 Coroutine fadingOut = StartCoroutine(FadeOut(heartBeatAudioSource, 1f));
                 if (fadingOut != null)
                 {
                     StopCoroutine(fadingOut);
                 }
             }
+            // Slowly increase the detection Counter again
             if(detectionCounter < detectionTime)
             {
                 detectionCounter += Time.deltaTime / 2;
@@ -186,6 +179,7 @@ public class PlayerController : MonoBehaviour {
             RaycastHit2D newCheckpoint = (RaycastHit2D)WhichRaycastForTag("Checkpoint", rays.detectRight, rays.detectLeft);
             GameManager.Instance.currentCheckpoint = newCheckpoint.collider.gameObject.transform.position;
         }
+        // Shout when the button is pressed
         if(input.Shout)
         {
             GameManager.Instance.MakeNoise(shoutRange, transform.position);
@@ -211,44 +205,48 @@ public class PlayerController : MonoBehaviour {
 
         rays.top = Physics2D.Raycast(transform.position + Vector3.up * 0.4f, Vector2.up, 0.2f, layersToCollideWith);
 
-        anyRaycast[0] = rays.bottomRight;
-        anyRaycast[1] = rays.bottomLeft;
-        anyRaycast[2] = rays.lowerLeft;
-        anyRaycast[3] = rays.upperLeft;
-        anyRaycast[4] = rays.lowerRight;
-        anyRaycast[5] = rays.upperRight;
-        anyRaycast[6] = rays.top;
+        anyPhysicsRaycast[0] = rays.bottomRight;
+        anyPhysicsRaycast[1] = rays.bottomLeft;
+        anyPhysicsRaycast[2] = rays.lowerLeft;
+        anyPhysicsRaycast[3] = rays.upperLeft;
+        anyPhysicsRaycast[4] = rays.lowerRight;
+        anyPhysicsRaycast[5] = rays.upperRight;
+        anyPhysicsRaycast[6] = rays.top;
 
         #endregion
 
-        // Make player move slower when crouching
+        // Make player move slower when crouching and set the eye position down
         if(bCrouching)
         {
             actualSpeed = speed * crouchSpeedPenalty;
             eyes = transform.position + Vector3.down * 0.2f;
 
         }
+        // Otherwise make him have the normal speed and normal eyeposition
         else
         {
             actualSpeed = speed;
             eyes = new Vector3(transform.position.x, transform.position.y + 0.8f);
         }
 
+        // Set the horizontale velocity to the given input
         velocity = new Vector3(input.Horizontal * actualSpeed * Time.fixedDeltaTime, velocity.y);
 
         CheckGrounded();
 
+        // When the player is not crouching, allow him to jump
         if (!bCrouching)
         {
             HandleJump();
         }
 
-        // Apply Gravity
+        // Apply Gravity if not grounded
         if (!bGrounded)
         {
             velocity.y -= gravity * Time.fixedDeltaTime;
         }
 
+        // Apply the velocity to the transform position after its validity was checked
         CheckVelocity();
         transform.position += velocity;
     }
@@ -261,22 +259,10 @@ public class PlayerController : MonoBehaviour {
 
 
     #region HelperMethods
-
-    IEnumerator FadeOut(AudioSource audioSource, float FadeTime)
-    {
-        float startVolume = audioSource.volume;
-
-        while(audioSource.volume > 0f)
-        {
-            audioSource.volume -= Time.deltaTime / 4;
-
-            yield return new WaitForEndOfFrame();
-        }
-        audioSource.Stop();
-        audioSource.volume = 1f;
-        yield break;
-    }
-
+    
+    /// <summary>
+    /// Necessary changes to make the player die and a new one to be activated
+    /// </summary>
     public void Die()
     {
         heartBeatAudioSource.Stop();
@@ -284,11 +270,28 @@ public class PlayerController : MonoBehaviour {
         Quaternion newRotation = new Quaternion();
         newRotation.eulerAngles = new Vector3(0f, 0f, 90f);
         gameObject.transform.rotation = newRotation;
-        // Disable the script
-        gameObject.GetComponent<PlayerController>().enabled = false;
         // Delete the reference to this gameObject on the camera to cause the next player to get activated
         cam.GetComponentInParent<FollowPlayer>().player = null;
+        // Disable the script
+        gameObject.GetComponent<PlayerController>().enabled = false;
     }
+
+    /// <summary>
+    /// Flips the Sprite when the player walks to the left and flips back when he walks to the right
+    /// </summary>
+    private void Flip()
+    {
+        if (input.Horizontal < 0f)
+        {
+            rend.flipX = true;
+        }
+        else if (input.Horizontal > 0f)
+        {
+            rend.flipX = false;
+        }
+    }
+
+    #region Physics Helper
 
     /// <summary>
     /// Make sure the velocity does not violate the laws of physics in this game
@@ -327,26 +330,12 @@ public class PlayerController : MonoBehaviour {
     }
 
     /// <summary>
-    /// Flips the Sprite when the player walks to the left and flips back when he walks to the right
-    /// </summary>
-    private void Flip()
-    {
-        if (input.Horizontal < 0f)
-        {
-            rend.flipX = true;
-        }
-        else if (input.Horizontal > 0f)
-        {
-            rend.flipX = false;
-        }
-    }
-
-    /// <summary>
     /// Checks if there are walls in the direction the player is facing
     /// </summary>
     /// <returns> True if there is a wall. False when there is none</returns>
     private bool WallInWay()
     {
+        // When the player looks left and there is a wall in the wall, set bOnWall to true and return true
         if (rend.flipX == true)
         {
             if (RaycastForTag("Ground", rays.upperLeft, rays.lowerLeft))
@@ -355,6 +344,7 @@ public class PlayerController : MonoBehaviour {
                 return true;
             }
         }
+        // Otherwise when the player looks right and there is a wall in the way, set bOnWall to true and return true
         else if (rend.flipX == false)
         {
             if (RaycastForTag("Ground", rays.upperRight, rays.lowerRight))
@@ -363,6 +353,7 @@ public class PlayerController : MonoBehaviour {
                 return true;
             }
         }
+        // Otherwise set bOnwall to false and return false
         bOnWall = false;
         return false;
     }
@@ -384,6 +375,10 @@ public class PlayerController : MonoBehaviour {
         return false;
     }
 
+    #endregion
+
+    #region Raycast Helper
+
     /// <summary>
     /// Checks if there is a raycast of the given in parameters hitting an object with the right tag
     /// </summary>
@@ -392,6 +387,7 @@ public class PlayerController : MonoBehaviour {
     /// <returns> True if there was any raycast hitting an object with the right tag. False if there was none.</returns>
     private bool RaycastForTag(string tag, params RaycastHit2D[] rayArray)
     {
+        // Iterates through the given raycasts and checks if one of them hits a collider, tagged as the given tag
         for (int i = 0; i < rayArray.Length; i++)
         {
             if (rayArray[i].collider != null)
@@ -413,6 +409,7 @@ public class PlayerController : MonoBehaviour {
     /// <returns> The first raycast who hit an object with the right tag</returns>
     private RaycastHit2D? WhichRaycastForTag(string tag, params RaycastHit2D[] rayArray)
     {
+        // Iterates through the given raycasts and returns the raycast hit which did hit a collider, tagged with the given tag
         for (int i = 0; i < rayArray.Length; i++)
         {
             if (rayArray[i].collider != null)
@@ -425,6 +422,10 @@ public class PlayerController : MonoBehaviour {
         }
         return null;
     }
+
+    #endregion
+
+    #region Coroutines
 
     /// <summary>
     /// Stop the time and make it run again after n frames
@@ -440,6 +441,29 @@ public class PlayerController : MonoBehaviour {
         }
         Time.timeScale = 1f;
     }
+
+    /// <summary>
+    /// Makes the given audiosource fade out over the given time
+    /// </summary>
+    /// <param name="audioSource"></param>
+    /// <param name="FadeTime"></param>
+    /// <returns></returns>
+    IEnumerator FadeOut(AudioSource audioSource, float FadeTime)
+    {
+        // Slowly fade out the volume 
+        while (audioSource.volume > 0f)
+        {
+            audioSource.volume -= Time.deltaTime / 4;
+
+            yield return new WaitForEndOfFrame();
+        }
+        // Make the sound stop and set the volume back to 1
+        audioSource.Stop();
+        audioSource.volume = 1f;
+        yield break;
+    }
+
+    #endregion
 
     #endregion
 
@@ -486,6 +510,9 @@ public class PlayerController : MonoBehaviour {
 
     #endregion
 
+    /// <summary>
+    /// Make the player crouch
+    /// </summary>
     private void Crouch()
     {
         bCrouching = true;
@@ -497,16 +524,17 @@ public class PlayerController : MonoBehaviour {
     /// </summary>
     private void CheckGrounded()
     {
+        // Count down the counter after the player fell through a ground gate
         if(fellThroughCounter > 0f)
         {
             fellThroughCounter -= Time.fixedDeltaTime;
         }
-        // When the bottom left collider hit something tagged as ground
+        // Check if the player is grounded using the bottom raycasts of the player
         if (RaycastForTag("Ground", rays.bottomLeft, rays.bottomRight))
         {
             bGrounded = true;
-            //anim.SetBool("Grounded", true);
         }
+        // Make the player fall through ground gates when the player holds down the left analog stick or walk over the ground gates if he chooses not to hold down the stick
         else if (RaycastForTag("GroundGate", rays.bottomRight, rays.bottomLeft))
         {
             if(input.Vertical >= 0 && fellThroughCounter <= 0f)
@@ -523,7 +551,6 @@ public class PlayerController : MonoBehaviour {
         else
         {
             bGrounded = false;
-            //anim.SetBool("Grounded", false);
         }
     }
 }
