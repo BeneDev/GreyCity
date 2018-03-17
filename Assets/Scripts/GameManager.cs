@@ -39,6 +39,14 @@ public class GameManager : MonoBehaviour {
         enemiesMask = 1 << layerEnemies;
     }
 
+    private void Start()
+    {
+        if (OnPlayerChanged != null)
+        {
+            GetNextPlayer();
+        }
+    }
+
     private void Update()
     {
         if(Camera.main.GetComponentInParent<FollowPlayer>().player == null)
@@ -69,7 +77,7 @@ public class GameManager : MonoBehaviour {
         Collider2D[] enemiesToAlert = Physics2D.OverlapCircleAll(emitterPos, radius, enemiesMask);
         for (int i = 0; i < enemiesToAlert.Length - 1; i++)
         {
-            enemiesToAlert[i].gameObject.GetComponent<NormalGuard>().GetAlerted(emitterPos);
+            enemiesToAlert[i].gameObject.GetComponent<GeneralEnemy>().PointToCheck = emitterPos;
         }
         soundNoise.PlayOneShot(soundNoise.clip);
     }

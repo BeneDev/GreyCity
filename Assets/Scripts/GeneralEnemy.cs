@@ -43,6 +43,18 @@ public class GeneralEnemy : MonoBehaviour
         }
     }
 
+    public Vector3 PointToCheck
+    {
+        get
+        {
+            return pointToCheck;
+        }
+        set
+        {
+            pointToCheck = value;
+        }
+    }
+
     #endregion
 
     #region Fields
@@ -52,6 +64,7 @@ public class GeneralEnemy : MonoBehaviour
 
     // The layer mask used to collide with only walls
     protected LayerMask layersToCollideWith;
+    protected LayerMask layersBlockingView;
     protected BoxCollider2D coll;
     protected SpriteRenderer rend;
 
@@ -75,6 +88,8 @@ public class GeneralEnemy : MonoBehaviour
 
     protected bool bStandStill = false;
 
+    protected bool bPlayerInSight = false;
+
     Vector3 pointToCheck = Vector3.zero;
 
     [SerializeField] float durationUntilNotDetected = 3f;
@@ -90,9 +105,13 @@ public class GeneralEnemy : MonoBehaviour
     protected virtual void GeneralInitialization()
     {
         coll = GetComponent<BoxCollider2D>();
-        // Get the layerMask for collision
-        int layer = LayerMask.NameToLayer("Ground");
-        layersToCollideWith = 1 << layer;
+        // Get all layermasks
+        int groundLayer = LayerMask.NameToLayer("Ground");
+        int defaultLayer = LayerMask.NameToLayer("Default");
+        layersToCollideWith = 1 << groundLayer;
+        layersBlockingView = 1 << groundLayer;
+        LayerMask defaultMask = 1 << defaultLayer;
+        layersBlockingView = layersBlockingView | defaultMask;
         rend = GetComponent<SpriteRenderer>();
         GameManager.Instance.OnPlayerChanged += GetNewPlayer;
         if (transform.localScale.x == -1)
@@ -122,16 +141,31 @@ public class GeneralEnemy : MonoBehaviour
         if (player)
         {
             toPlayer = player.transform.position - transform.position;
+            if(eyes.GetComponent<BoxCollider2D>().bounds.Contains(player.transform.position))
+            {
+                bPlayerInSight = true;
+            }
+            else
+            {
+                bPlayerInSight = false;
+            }
         }
-        if(!BDetected && pointToCheck == Vector3.zero && !bStandStill)
+        if(!BDetected && pointToCheck == Vector3.zero)
         {
             SimpleMove();
         }
-        else if(BDetected)
+        if (bPlayerInSight)
+        {
+            if (CheckForDetected())
+            {
+                BDetected = true;
+            }
+        }
+        if(BDetected)
         {
             DetectedBehavior();
         }
-        else if(pointToCheck != Vector3.zero)
+        if (!BDetected && pointToCheck != Vector3.zero)
         {
             StartCoroutine(AlertedBehavior());
         }
@@ -139,7 +173,7 @@ public class GeneralEnemy : MonoBehaviour
         {
             durationUntilNotDetectedCounter -= Time.deltaTime;
         }
-        else if(durationUntilNotDetectedCounter <= 0f && BDetected)
+        else if (durationUntilNotDetectedCounter <= 0f && BDetected)
         {
             BDetected = false;
         }
@@ -160,26 +194,12 @@ public class GeneralEnemy : MonoBehaviour
         if (!eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck))
         {
             transform.position += new Vector3(moveSpeed * 0.75f * transform.localScale.x * Time.deltaTime, 0f);
-        }
-        if (eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck))
-        {
             StartCoroutine(GiveUpAfterSeconds(timeToGiveUpAfter));
         }
-        //else if (eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck))
-        //{
-        //    yield return new WaitForSeconds(timeToGiveUpAfter/2);
-        //    //for (int i = 0; i < (int)Random.Range(2f, 5f); i++)
-        //    //{
-        //    //    print("found player");
-        //    //    BLookLeft = !BLookLeft;
-        //    //    yield return new WaitForSeconds(Random.Range(100f, 200f));
-        //    //}
-        //    BLookLeft = false;
-        //    yield return new WaitForSeconds(timeToGiveUpAfter/4);
-        //    BLookLeft = !BLookLeft;
-        //    yield return new WaitForSeconds(timeToGiveUpAfter / 2);
-        //    pointToCheck = Vector3.zero;
-        //}
+        else
+        {
+            //Look Around
+        }
     }
     
     IEnumerator GiveUpAfterSeconds(float seconds)
@@ -200,15 +220,32 @@ public class GeneralEnemy : MonoBehaviour
         bStandStill = false;
     }
 
-    //private void OnDrawGizmos()
-    //{
-    //    Gizmos.DrawRay(transform.position + new Vector3(coll.bounds.extents.x, 0.0f), Vector2.right * 0.2f);
-    //    Gizmos.DrawRay(transform.position + new Vector3(-coll.bounds.extents.x, 0.0f), Vector2.left * 0.2f);
-    //}
-
-    public void GetAlerted(Vector3 newPointToCheck)
+    private bool CheckForDetected()
     {
-        pointToCheck = newPointToCheck;
+        Vector3 direction = player.GetComponent<PlayerController>().PlayerEyes - eyes.transform.position;
+        Debug.DrawRay(eyes.transform.position, direction);
+        //RaycastHit2D[] hits = Physics2D.RaycastAll(eyes.transform.position, direction, direction.magnitude, layersToCollideWith);
+        //if (hits.Length > 0)
+        //{
+        //    for (int i = 0; i < hits.Length - 1; i++)
+        //    {
+        //        print(hits[i].collider.tag);
+        //        if (hits[i].collider.tag == "Ground" || hits[i].collider.tag == "HideBehind")
+        //        {
+        //            return false;
+        //        }
+        //    }
+        //}
+        //print("So detected");
+        //return true;
+        if (Physics2D.Raycast(eyes.transform.position, direction, direction.magnitude, layersBlockingView))
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
     }
 
     protected void GetNewPlayer(GameObject newPlayer)
@@ -218,6 +255,7 @@ public class GeneralEnemy : MonoBehaviour
 
     protected virtual void DetectedBehavior()
     {
+        player.GetComponent<PlayerController>().DetectionCounter -= Time.deltaTime;
         if (player)
         {
             if (toPlayer.x > 0)

@@ -4,6 +4,30 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour {
 
+    #region Properties
+
+    public Vector3 PlayerEyes
+    {
+        get
+        {
+            return eyes;
+        }
+    }
+
+    public float DetectionCounter
+    {
+        get
+        {
+            return detectionCounter;
+        }
+        set
+        {
+            detectionCounter = value;
+        }
+    }
+
+    #endregion
+
     #region Fields
 
     [Header("Physics"), SerializeField] float gravity = 1f;
@@ -126,10 +150,6 @@ public class PlayerController : MonoBehaviour {
             {
                 heartBeatAudioSource.Play();
             }
-            if(CheckForDetected())
-            {
-                detectionCounter -= Time.deltaTime;
-            }
             else if(detectionCounter < detectionTime * 0.75f)
             {
                 detectionCounter -= Time.deltaTime;
@@ -205,7 +225,7 @@ public class PlayerController : MonoBehaviour {
         if(bCrouching)
         {
             actualSpeed = speed * crouchSpeedPenalty;
-            eyes = transform.position;
+            eyes = transform.position + Vector3.down * 0.2f;
 
         }
         else
@@ -257,55 +277,17 @@ public class PlayerController : MonoBehaviour {
         yield break;
     }
 
-    private void Die()
+    public void Die()
     {
         heartBeatAudioSource.Stop();
         // Rotate the old player to show he ded
         Quaternion newRotation = new Quaternion();
         newRotation.eulerAngles = new Vector3(0f, 0f, 90f);
         gameObject.transform.rotation = newRotation;
-        // Make the enemy not detect player and stand still for some seconds
-        RaycastHit2D enemyWhoKilled = (RaycastHit2D)WhichRaycastForTag("EnemyLight", rays.detectRight, rays.detectLeft);
-        enemyWhoKilled.collider.gameObject.GetComponentInParent<GeneralEnemy>().BDetected = false;
-        enemyWhoKilled.collider.gameObject.GetComponentInParent<GeneralEnemy>().DontMoveForSeconds(5f);
         // Disable the script
         gameObject.GetComponent<PlayerController>().enabled = false;
         // Delete the reference to this gameObject on the camera to cause the next player to get activated
         cam.GetComponentInParent<FollowPlayer>().player = null;
-    }
-
-    /// <summary>
-    /// Check if the player is detected or if he is behind an object, blocking the view
-    /// </summary>
-    /// <returns></returns>
-    private bool CheckForDetected()
-    {
-        GameObject enemyToAlarm = null;
-        RaycastHit2D hit = (RaycastHit2D)WhichRaycastForTag("EnemyLight", rays.detectLeft, rays.detectRight);
-        bool bDetected = false;
-        Vector3 direction = hit.collider.gameObject.transform.position - eyes;
-        RaycastHit2D[] hits = Physics2D.RaycastAll(eyes, direction, direction.magnitude);
-        Debug.DrawRay(eyes, direction);
-        if (hits.Length > 0)
-        {
-            for (int i = 0; i < hits.Length - 1; i++)
-            {
-                if (hits[i].collider.tag == "Ground" || hits[i].collider.tag == "HideBehind")
-                {
-                    return false;
-                }
-                else if(hits[i].collider.tag == "EnemyLight")
-                {
-                    bDetected = true;
-                    enemyToAlarm = hits[i].collider.gameObject;
-                }
-            }
-        }
-        if(enemyToAlarm != null)
-        {
-            enemyToAlarm.GetComponentInParent<GeneralEnemy>().BDetected = true;
-        }
-        return bDetected;
     }
 
     /// <summary>
