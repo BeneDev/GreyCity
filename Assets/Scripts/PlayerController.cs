@@ -12,7 +12,7 @@ public class PlayerController : MonoBehaviour {
     [SerializeField] float jumpForce = 1f;
     [SerializeField] float fallFactor = 0.2f;
 
-    [SerializeField] float speed = 3f;
+    [Header("Speed Values"), SerializeField] float speed = 3f;
     private float actualSpeed;
     [SerializeField] float crouchSpeedPenalty = 0.15f;
 
@@ -32,10 +32,14 @@ public class PlayerController : MonoBehaviour {
 
     private GameObject grabbedObject;
 
-    [SerializeField] float detectionTime = 2f; // The amount of seconds it takes to get detected
+    [Header("Ranges"), SerializeField] float shoutRange = 50f;
+    [SerializeField] float stepRange = 1f;
+
+    [Header("Timer"), SerializeField] float detectionTime = 2f; // The amount of seconds it takes to get detected
     private float detectionCounter;
 
-    [SerializeField] AudioSource heartBeatAudioSource;
+    [Header("Sound"), SerializeField] AudioSource heartBeatAudioSource;
+    [SerializeField] AudioSource soundNoise;
 
     private bool bJumpable = true;
     private bool bOnWall = false;
@@ -163,7 +167,7 @@ public class PlayerController : MonoBehaviour {
         }
         if(input.Shout)
         {
-            MakeNoise(50f);
+            MakeNoise(shoutRange);
         }
     }
 
@@ -302,6 +306,7 @@ public class PlayerController : MonoBehaviour {
         {
             enemiesToAlert[i].gameObject.GetComponent<NormalGuard>().GetAlerted(transform.position);
         }
+        soundNoise.PlayOneShot(soundNoise.clip);
     }
 
     /// <summary>

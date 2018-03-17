@@ -37,7 +37,7 @@ public class GeneralEnemy : MonoBehaviour
         {
             if(value == true)
             {
-                durationUntilNotAlarmedCounter = durationUntilNotAlarmed;
+                durationUntilNotDetectedCounter = durationUntilNotDetected;
             }
             bDetected = value;
         }
@@ -75,8 +75,10 @@ public class GeneralEnemy : MonoBehaviour
 
     Vector3 pointToCheck = Vector3.zero;
 
-    [SerializeField] float durationUntilNotAlarmed = 3f;
-    protected float durationUntilNotAlarmedCounter;
+    [SerializeField] float durationUntilNotDetected = 3f;
+    protected float durationUntilNotDetectedCounter;
+
+    [SerializeField] float timeToGiveUpAfter = 6f; // The amount of seconds after which the enemy will give up to look for the point where the alerting sound came from
 
     [SerializeField] float moveSpeed = 1f;
     [SerializeField] float stoppingDistance = 0.5f;
@@ -147,18 +149,18 @@ public class GeneralEnemy : MonoBehaviour
             if (toPoint.x > stoppingDistance || toPoint.x < -stoppingDistance)
             {
                 transform.position += new Vector3(moveSpeed * 2f * transform.localScale.x * Time.deltaTime, 0f);
-                StartCoroutine(LeaveItAfterSeconds(6f));
+                StartCoroutine(LeaveItAfterSeconds(timeToGiveUpAfter));
             }
             if (eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck) && !eyes.GetComponent<BoxCollider2D>().bounds.Contains(player.transform.position))
             {
                 pointToCheck = Vector3.zero;
             }
         }
-        if(durationUntilNotAlarmedCounter > 0f)
+        if(durationUntilNotDetectedCounter > 0f)
         {
-            durationUntilNotAlarmedCounter -= Time.deltaTime;
+            durationUntilNotDetectedCounter -= Time.deltaTime;
         }
-        else if(durationUntilNotAlarmedCounter <= 0f && BDetected)
+        else if(durationUntilNotDetectedCounter <= 0f && BDetected)
         {
             BDetected = false;
         }
