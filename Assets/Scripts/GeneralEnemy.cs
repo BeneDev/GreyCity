@@ -155,15 +155,26 @@ public class GeneralEnemy : MonoBehaviour
             BLookLeft = true;
         }
         yield return new WaitForSeconds(1f);
-        if (toPoint.magnitude > stoppingDistance)
+        if (!eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck))
         {
             transform.position += new Vector3(moveSpeed * 0.75f * transform.localScale.x * Time.deltaTime, 0f);
-            StartCoroutine(LeaveItAfterSeconds(timeToGiveUpAfter));
+            yield return new WaitForSeconds(timeToGiveUpAfter);
+            pointToCheck = Vector3.zero;
         }
         else if (eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck))
         {
-            print("Should look around now");
-            StartCoroutine(LookAround());
+            yield return new WaitForSeconds(timeToGiveUpAfter/2);
+            //for (int i = 0; i < (int)Random.Range(2f, 5f); i++)
+            //{
+            //    print("found player");
+            //    BLookLeft = !BLookLeft;
+            //    yield return new WaitForSeconds(Random.Range(100f, 200f));
+            //}
+            BLookLeft = false;
+            yield return new WaitForSeconds(timeToGiveUpAfter/4);
+            BLookLeft = true;
+            yield return new WaitForSeconds(timeToGiveUpAfter / 2);
+            pointToCheck = Vector3.zero;
         }
     }
     
@@ -182,22 +193,6 @@ public class GeneralEnemy : MonoBehaviour
     protected void GetNewPlayer(GameObject newPlayer)
     {
         player = newPlayer;
-    }
-
-    IEnumerator LookAround()
-    {
-        for (int t = 0; t < (int)Random.Range(3f, 5f); t++)
-        {
-            yield return new WaitForSeconds(Random.Range(1f, 2f));
-            BLookLeft = !BLookLeft;
-        }
-        pointToCheck = Vector3.zero;
-    }
-
-    IEnumerator LeaveItAfterSeconds(float seconds)
-    {
-        yield return new WaitForSeconds(seconds);
-        StartCoroutine(LookAround());
     }
 
     protected virtual void DetectedBehavior()

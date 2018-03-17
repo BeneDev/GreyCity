@@ -90,7 +90,6 @@ public class PlayerController : MonoBehaviour {
         int layerEnemyLight = LayerMask.NameToLayer("EnemiesLight");
         layersToCollideWith = 1 << layerGround;
         layersToInteractWith = 1 << layerEnemyLight;
-        layersToCollideWith = layersToCollideWith | layersToInteractWith;
 
         //Make shadows happen
         rend.receiveShadows = true;
@@ -128,14 +127,18 @@ public class PlayerController : MonoBehaviour {
             if(CheckForDetected())
             {
                 detectionCounter -= Time.deltaTime;
-                if(detectionCounter <= 0f)
-                {
-                    Die();
-                }
+            }
+            else if(detectionCounter < detectionTime * 0.75f)
+            {
+                detectionCounter -= Time.deltaTime;
+            }
+            if (detectionCounter <= 0f)
+            {
+                Die();
             }
         }
         // Count down the detection Counter when not in sight of a Guard
-        else
+        else if(!RaycastForTag("EnemyLight", anyRaycast))
         {
             if (heartBeatAudioSource.isPlaying)
             {
