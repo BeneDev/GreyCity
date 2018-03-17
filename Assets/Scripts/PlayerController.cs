@@ -28,6 +28,7 @@ public class PlayerController : MonoBehaviour {
 
     private LayerMask layersToCollideWith;
     private LayerMask layersToInteractWith;
+    private LayerMask enemiesMask;
 
     private GameObject grabbedObject;
 
@@ -83,10 +84,12 @@ public class PlayerController : MonoBehaviour {
         rend = GetComponent<SpriteRenderer>();
         cam = Camera.main;
         // Get the layerMask for collision
-        int layer = LayerMask.NameToLayer("Ground");
-        int layer2 = LayerMask.NameToLayer("EnemiesLight");
-        layersToCollideWith = 1 << layer;
-        layersToInteractWith = 1 << layer2;
+        int layerGround = LayerMask.NameToLayer("Ground");
+        int layerEnemyLight = LayerMask.NameToLayer("EnemiesLight");
+        int layerEnemies = LayerMask.NameToLayer("Enemies");
+        layersToCollideWith = 1 << layerGround;
+        layersToInteractWith = 1 << layerEnemyLight;
+        enemiesMask = 1 << layerEnemies;
         layersToCollideWith = layersToCollideWith | layersToInteractWith;
 
         //Make shadows happen
@@ -97,10 +100,6 @@ public class PlayerController : MonoBehaviour {
 
     // Update is called once per frame
     void Update () {
-        //if(input.Dodge)
-        //{
-        //    print("Dodge");
-        //}
         //if(input.Interact)
         //{
         //    print("Grab or throw");
@@ -161,6 +160,10 @@ public class PlayerController : MonoBehaviour {
         {
             RaycastHit2D newCheckpoint = (RaycastHit2D)WhichRaycastForTag("Checkpoint", anyRaycast);
             GameManager.Instance.currentCheckpoint = newCheckpoint.collider.gameObject.transform.position;
+        }
+        if(input.Shout)
+        {
+            MakeNoise(50f);
         }
     }
 
@@ -287,9 +290,18 @@ public class PlayerController : MonoBehaviour {
         }
         if(enemyToAlarm != null)
         {
-            enemyToAlarm.GetComponentInParent<GeneralEnemy>().BAlarmed = true;
+            enemyToAlarm.GetComponentInParent<GeneralEnemy>().BDetected = true;
         }
         return bDetected;
+    }
+
+    private void MakeNoise(float radius)
+    {
+        Collider2D[] enemiesToAlert = Physics2D.OverlapCircleAll(transform.position, radius, enemiesMask);
+        for(int i = 0; i < enemiesToAlert.Length -1; i++)
+        {
+            enemiesToAlert[i].gameObject.GetComponent<NormalGuard>().GetAlerted(transform.position);
+        }
     }
 
     /// <summary>

@@ -61,11 +61,11 @@ public class PlayerInput : MonoBehaviour, IInput
     }
 
     // Looks for Input for Dodge
-    public bool Dodge
+    public bool Shout
     {
         get
         {
-            if (Input.GetButtonDown("Dodge"))
+            if (Input.GetButtonDown("Shout"))
             {
                 return true;
             }

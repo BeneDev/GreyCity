@@ -27,11 +27,11 @@ public class GeneralEnemy : MonoBehaviour
         }
     }
 
-    public bool BAlarmed
+    public bool BDetected
     {
         get
         {
-            return bAlarmed;
+            return bDetected;
         }
         set
         {
@@ -39,7 +39,7 @@ public class GeneralEnemy : MonoBehaviour
             {
                 durationUntilNotAlarmedCounter = durationUntilNotAlarmed;
             }
-            bAlarmed = value;
+            bDetected = value;
         }
     }
 
@@ -71,7 +71,10 @@ public class GeneralEnemy : MonoBehaviour
 
     [SerializeField] GameObject eyes;
 
-    public bool bAlarmed = false;
+    protected bool bDetected = false;
+
+    Vector3 pointToCheck = Vector3.zero;
+
     [SerializeField] float durationUntilNotAlarmed = 3f;
     protected float durationUntilNotAlarmedCounter;
 
@@ -122,21 +125,42 @@ public class GeneralEnemy : MonoBehaviour
         {
             toPlayer = player.transform.position - transform.position;
         }
-        if(!bAlarmed)
+        if(!BDetected && pointToCheck == Vector3.zero)
         {
             SimpleMove();
         }
-        else
+        else if(BDetected)
         {
-            AlarmedBehavior();
+            DetectedBehavior();
+        }
+        else if(toPlayer != Vector3.zero)
+        {
+            Vector3 toPoint = pointToCheck - transform.position;
+            if (toPoint.x > 0)
+            {
+                BLookLeft = false;
+            }
+            else if (toPoint.x < 0)
+            {
+                BLookLeft = true;
+            }
+            if (toPoint.x > stoppingDistance || toPoint.x < -stoppingDistance)
+            {
+                transform.position += new Vector3(moveSpeed * 2f * transform.localScale.x * Time.deltaTime, 0f);
+                StartCoroutine(LeaveItAfterSeconds(6f));
+            }
+            if (eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck) && !eyes.GetComponent<BoxCollider2D>().bounds.Contains(player.transform.position))
+            {
+                pointToCheck = Vector3.zero;
+            }
         }
         if(durationUntilNotAlarmedCounter > 0f)
         {
             durationUntilNotAlarmedCounter -= Time.deltaTime;
         }
-        else if(durationUntilNotAlarmedCounter <= 0f && BAlarmed)
+        else if(durationUntilNotAlarmedCounter <= 0f && BDetected)
         {
-            BAlarmed = false;
+            BDetected = false;
         }
     }
 
@@ -146,13 +170,24 @@ public class GeneralEnemy : MonoBehaviour
     //    Gizmos.DrawRay(transform.position + new Vector3(-coll.bounds.extents.x, 0.0f), Vector2.left * 0.2f);
     //}
 
+    public void GetAlerted(Vector3 newPointToCheck)
+    {
+        pointToCheck = newPointToCheck;
+    }
+
     protected void GetNewPlayer(GameObject newPlayer)
     {
         print("Got it");
         player = newPlayer;
     }
 
-    protected virtual void AlarmedBehavior()
+    IEnumerator LeaveItAfterSeconds(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        pointToCheck = Vector3.zero;
+    }
+
+    protected virtual void DetectedBehavior()
     {
         //Quaternion newRotation = Quaternion.LookRotation(toPlayer);
         //newRotation.eulerAngles = new Vector3(newRotation.eulerAngles.x, 0f, newRotation.eulerAngles.z);

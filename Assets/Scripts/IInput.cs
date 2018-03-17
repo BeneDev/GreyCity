@@ -10,7 +10,7 @@ public interface IInput
 
     int Jump { get; }
 
-    bool Dodge { get; }
+    bool Shout { get; }
 
     bool Crouch { get; }
 

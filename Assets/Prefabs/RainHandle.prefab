@@ -143,7 +143,7 @@ ParticleSystem:
   moveWithTransform: 1
   moveWithCustomTransform: {fileID: 0}
   scalingMode: 2
-  randomSeed: -2084538199
+  randomSeed: -38836025
   InitialModule:
     serializedVersion: 3
     enabled: 1
@@ -2596,7 +2596,7 @@ ParticleSystem:
     m_EnergyLossOnCollision:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.2
+      scalar: 0.15
       minScalar: 0
       maxCurve:
         serializedVersion: 2
@@ -2639,7 +2639,7 @@ ParticleSystem:
     radiusScale: 1
     collidesWith:
       serializedVersion: 2
-      m_Bits: 4294966271
+      m_Bits: 4294965705
     maxCollisionShapes: 256
     quality: 2
     voxelSize: 0.5
