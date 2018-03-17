@@ -86,8 +86,6 @@ public class GeneralEnemy : MonoBehaviour
 
     protected bool bDetected = false;
 
-    protected bool bStandStill = false;
-
     protected bool bPlayerInSight = false;
 
     Vector3 pointToCheck = Vector3.zero;
@@ -99,6 +97,9 @@ public class GeneralEnemy : MonoBehaviour
 
     [SerializeField] float moveSpeed = 1f;
     [SerializeField] float stoppingDistance = 0.5f;
+
+    [Header("Sound"), SerializeField] AudioSource alarmSound;
+    protected float alarmSoundVolume;
 
     #endregion
 
@@ -124,6 +125,7 @@ public class GeneralEnemy : MonoBehaviour
         }
         rend.receiveShadows = true;
         rend.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
+        alarmSoundVolume = alarmSound.volume;
     }
 
     protected virtual void GeneralBehavior()
@@ -163,7 +165,23 @@ public class GeneralEnemy : MonoBehaviour
         }
         if(BDetected)
         {
+            if (!alarmSound.isPlaying)
+            {
+                alarmSound.Play();
+            }
             DetectedBehavior();
+        }
+        else
+        {
+            if (alarmSound.isPlaying)
+            {
+                // Stop the audio source from playing
+                Coroutine fadingOut = StartCoroutine(FadeOut(alarmSound, 1f));
+                if (fadingOut != null)
+                {
+                    StopCoroutine(fadingOut);
+                }
+            }
         }
         if (!BDetected && pointToCheck != Vector3.zero)
         {
@@ -176,6 +194,7 @@ public class GeneralEnemy : MonoBehaviour
         else if (durationUntilNotDetectedCounter <= 0f && BDetected)
         {
             BDetected = false;
+            // TODO Look Around now
         }
     }
 
@@ -198,7 +217,7 @@ public class GeneralEnemy : MonoBehaviour
         }
         else
         {
-            //Look Around
+            // TODO Look Around now
         }
     }
     
@@ -208,16 +227,17 @@ public class GeneralEnemy : MonoBehaviour
         pointToCheck = Vector3.zero;
     }
 
-    public void DontMoveForSeconds(float seconds)
+    IEnumerator FadeOut(AudioSource audioSource, float FadeTime)
     {
-        bStandStill = true;
-        StartCoroutine(WaitForMoveAgain(seconds));
-    }
+        while (audioSource.volume > 0f)
+        {
+            audioSource.volume -= Time.deltaTime / 4;
 
-    IEnumerator WaitForMoveAgain(float seconds)
-    {
-        yield return new WaitForSeconds(seconds);
-        bStandStill = false;
+            yield return new WaitForEndOfFrame();
+        }
+        audioSource.Stop();
+        audioSource.volume = alarmSoundVolume;
+        yield break;
     }
 
     private bool CheckForDetected()
