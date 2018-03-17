@@ -172,7 +172,7 @@ public class GeneralEnemy : MonoBehaviour
             //}
             BLookLeft = false;
             yield return new WaitForSeconds(timeToGiveUpAfter/4);
-            BLookLeft = true;
+            BLookLeft = !BLookLeft;
             yield return new WaitForSeconds(timeToGiveUpAfter / 2);
             pointToCheck = Vector3.zero;
         }

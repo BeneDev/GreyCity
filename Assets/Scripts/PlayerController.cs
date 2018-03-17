@@ -55,6 +55,8 @@ public class PlayerController : MonoBehaviour {
         public RaycastHit2D upperRight;
         public RaycastHit2D lowerRight;
         public RaycastHit2D top;
+        public RaycastHit2D detectRight;
+        public RaycastHit2D detectLeft;
     }
     PlayerRaycasts rays;
 
@@ -117,7 +119,7 @@ public class PlayerController : MonoBehaviour {
             heightToPullUpTo = 0f;
         }
         Flip();
-        if (RaycastForTag("EnemyLight", anyRaycast))
+        if (RaycastForTag("EnemyLight", rays.detectRight, rays.detectLeft))
         {
             heartBeatAudioSource.volume = 1f;
             if (heartBeatAudioSource && !heartBeatAudioSource.isPlaying)
@@ -138,7 +140,7 @@ public class PlayerController : MonoBehaviour {
             }
         }
         // Count down the detection Counter when not in sight of a Guard
-        else if(!RaycastForTag("EnemyLight", anyRaycast))
+        else if(!RaycastForTag("EnemyLight", rays.detectLeft, rays.detectRight))
         {
             if (heartBeatAudioSource.isPlaying)
             {
@@ -159,9 +161,9 @@ public class PlayerController : MonoBehaviour {
             }
         }
         // Detect Checkpoint in range and activate him
-        if (RaycastForTag("Checkpoint", anyRaycast))
+        if (RaycastForTag("Checkpoint", rays.detectRight, rays.detectLeft))
         {
-            RaycastHit2D newCheckpoint = (RaycastHit2D)WhichRaycastForTag("Checkpoint", anyRaycast);
+            RaycastHit2D newCheckpoint = (RaycastHit2D)WhichRaycastForTag("Checkpoint", rays.detectRight, rays.detectLeft);
             GameManager.Instance.currentCheckpoint = newCheckpoint.collider.gameObject.transform.position;
         }
         if(input.Shout)
@@ -178,13 +180,16 @@ public class PlayerController : MonoBehaviour {
         rays.bottomRight = Physics2D.Raycast(transform.position + Vector3.right * 0.1f + Vector3.down * 0.4f, Vector2.down, 0.2f, layersToCollideWith);
         rays.bottomLeft = Physics2D.Raycast(transform.position + Vector3.right * -0.2f + Vector3.down * 0.4f, Vector2.down, 0.2f, layersToCollideWith);
 
-        rays.lowerRight = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.right * 0.4f, Vector2.left, 0.2f);
-        rays.lowerLeft = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.left * 0.4f, Vector2.right, 0.2f);
-        
-        rays.upperRight = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.right * 0.4f, Vector2.left, 0.2f);
-        rays.upperLeft = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.left * 0.4f, Vector2.right, 0.2f);
+        rays.lowerRight = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.right * 0.4f, Vector2.left, 0.2f, layersToCollideWith);
+        rays.lowerLeft = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.left * 0.4f, Vector2.right, 0.2f, layersToCollideWith);
 
-        rays.top = Physics2D.Raycast(transform.position + Vector3.up * 0.4f, Vector2.up, 0.2f);
+        rays.upperRight = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.right * 0.4f, Vector2.left, 0.2f, layersToCollideWith);
+        rays.upperLeft = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.left * 0.4f, Vector2.right, 0.2f, layersToCollideWith);
+
+        rays.detectRight = Physics2D.Raycast(transform.position + Vector3.left * 0.4f, Vector2.right, 0.2f);
+        rays.detectLeft = Physics2D.Raycast(transform.position + Vector3.left * 0.4f, Vector2.right, 0.2f);
+
+        rays.top = Physics2D.Raycast(transform.position + Vector3.up * 0.4f, Vector2.up, 0.2f, layersToCollideWith);
 
         anyRaycast[0] = rays.bottomRight;
         anyRaycast[1] = rays.bottomLeft;
@@ -271,7 +276,7 @@ public class PlayerController : MonoBehaviour {
     private bool CheckForDetected()
     {
         GameObject enemyToAlarm = null;
-        RaycastHit2D hit = (RaycastHit2D)WhichRaycastForTag("EnemyLight", anyRaycast);
+        RaycastHit2D hit = (RaycastHit2D)WhichRaycastForTag("EnemyLight", rays.detectLeft, rays.detectRight);
         bool bDetected = false;
         Vector3 direction = hit.collider.gameObject.transform.position - eyes;
         RaycastHit2D[] hits = Physics2D.RaycastAll(eyes, direction, direction.magnitude);
