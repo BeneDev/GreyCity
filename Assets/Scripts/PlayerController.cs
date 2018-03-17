@@ -28,7 +28,6 @@ public class PlayerController : MonoBehaviour {
 
     private LayerMask layersToCollideWith;
     private LayerMask layersToInteractWith;
-    private LayerMask enemiesMask;
 
     private GameObject grabbedObject;
 
@@ -39,7 +38,6 @@ public class PlayerController : MonoBehaviour {
     private float detectionCounter;
 
     [Header("Sound"), SerializeField] AudioSource heartBeatAudioSource;
-    [SerializeField] AudioSource soundNoise;
 
     private bool bJumpable = true;
     private bool bOnWall = false;
@@ -90,10 +88,8 @@ public class PlayerController : MonoBehaviour {
         // Get the layerMask for collision
         int layerGround = LayerMask.NameToLayer("Ground");
         int layerEnemyLight = LayerMask.NameToLayer("EnemiesLight");
-        int layerEnemies = LayerMask.NameToLayer("Enemies");
         layersToCollideWith = 1 << layerGround;
         layersToInteractWith = 1 << layerEnemyLight;
-        enemiesMask = 1 << layerEnemies;
         layersToCollideWith = layersToCollideWith | layersToInteractWith;
 
         //Make shadows happen
@@ -167,7 +163,7 @@ public class PlayerController : MonoBehaviour {
         }
         if(input.Shout)
         {
-            MakeNoise(shoutRange);
+            GameManager.Instance.MakeNoise(shoutRange, transform.position);
         }
     }
 
@@ -297,16 +293,6 @@ public class PlayerController : MonoBehaviour {
             enemyToAlarm.GetComponentInParent<GeneralEnemy>().BDetected = true;
         }
         return bDetected;
-    }
-
-    private void MakeNoise(float radius)
-    {
-        Collider2D[] enemiesToAlert = Physics2D.OverlapCircleAll(transform.position, radius, enemiesMask);
-        for(int i = 0; i < enemiesToAlert.Length -1; i++)
-        {
-            enemiesToAlert[i].gameObject.GetComponent<NormalGuard>().GetAlerted(transform.position);
-        }
-        soundNoise.PlayOneShot(soundNoise.clip);
     }
 
     /// <summary>

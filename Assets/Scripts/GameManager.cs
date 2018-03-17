@@ -10,6 +10,10 @@ public class GameManager : MonoBehaviour {
 
     private Queue<GameObject> characters = new Queue<GameObject>();
 
+    private LayerMask enemiesMask;
+
+    [Header("Sounds"), SerializeField] AudioSource soundNoise;
+
     // Delegate for when the next player is on
     public event System.Action<GameObject> OnPlayerChanged;
 
@@ -31,6 +35,8 @@ public class GameManager : MonoBehaviour {
         {
             characters.Enqueue(player);
         }
+        int layerEnemies = LayerMask.NameToLayer("Enemies");
+        enemiesMask = 1 << layerEnemies;
     }
 
     private void Update()
@@ -56,5 +62,15 @@ public class GameManager : MonoBehaviour {
         {
             print("Gameover");
         }
+    }
+
+    public void MakeNoise(float radius, Vector3 emitterPos)
+    {
+        Collider2D[] enemiesToAlert = Physics2D.OverlapCircleAll(emitterPos, radius, enemiesMask);
+        for (int i = 0; i < enemiesToAlert.Length - 1; i++)
+        {
+            enemiesToAlert[i].gameObject.GetComponent<NormalGuard>().GetAlerted(emitterPos);
+        }
+        soundNoise.PlayOneShot(soundNoise.clip);
     }
 }
