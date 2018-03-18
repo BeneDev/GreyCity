@@ -244,6 +244,10 @@ public class GeneralEnemy : MonoBehaviour
             {
                 transform.position += new Vector3(moveSpeed * 2f * transform.localScale.x * Time.deltaTime, 0f);
             }
+            else if(toPlayer.magnitude < stoppingDistance)
+            {
+                transform.position += new Vector3(moveSpeed * 2f * -transform.localScale.x * Time.deltaTime, 0f);
+            }
         }
     }
 
