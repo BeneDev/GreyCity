@@ -334,7 +334,7 @@ MonoBehaviour:
   moveSpeed: 1.5
   stoppingDistance: 3
   durationUntilNotDetected: 12
-  timeToGiveUpAfter: 6
+  timeToGiveUpAfter: 10
   eyes: {fileID: 1206143528105100}
   alarmSound: {fileID: 82609318994137446}
 --- !u!212 &212091714966641724

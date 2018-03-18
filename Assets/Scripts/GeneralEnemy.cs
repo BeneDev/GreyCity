@@ -213,8 +213,8 @@ public class GeneralEnemy : MonoBehaviour
         }
         else if (durationUntilNotDetectedCounter <= 0f && BDetected)
         {
+            StartCoroutine(LookAround());
             BDetected = false;
-            // TODO Look Around now
         }
     }
 
@@ -300,10 +300,14 @@ public class GeneralEnemy : MonoBehaviour
             // Give up after a given time, when you cant get to the point
             StartCoroutine(GiveUpAfterSeconds(timeToGiveUpAfter));
         }
-        // Otherwise, when you are at the point, look around to find the player
-        else
+    }
+
+    IEnumerator LookAround()
+    {
+        for(int i = 0; i < (int)Random.Range(2f, 5f); i++)
         {
-            // TODO Look Around now
+            BLookLeft = !BLookLeft;
+            yield return new WaitForSeconds(Random.Range(1.5f, 3f));
         }
     }
 
@@ -319,6 +323,7 @@ public class GeneralEnemy : MonoBehaviour
         // Wait for given seconds until the point to walk to is reset to being zero
         yield return new WaitForSeconds(seconds);
         pointToCheck = Vector3.zero;
+        StartCoroutine(LookAround());
     }
 
     /// <summary>
