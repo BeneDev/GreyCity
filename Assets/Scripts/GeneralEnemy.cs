@@ -330,7 +330,7 @@ public class GeneralEnemy : MonoBehaviour
         // When there is anything of the layers which block the view in the way to the player, return false, otherwise true
         Vector3 direction = player.GetComponent<PlayerController>().PlayerEyes - eyes.transform.position;
         Debug.DrawRay(eyes.transform.position, direction);
-        if (Physics2D.Raycast(eyes.transform.position, direction, direction.magnitude, layersBlockingView))
+        if (Physics2D.Raycast(eyes.transform.position, direction, direction.magnitude, layersBlockingView) && !BDetected)
         {
             return false;
         }

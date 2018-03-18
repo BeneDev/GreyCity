@@ -333,7 +333,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   moveSpeed: 1.5
   stoppingDistance: 3
-  durationUntilNotDetected: 8
+  durationUntilNotDetected: 12
   timeToGiveUpAfter: 6
   eyes: {fileID: 1206143528105100}
   alarmSound: {fileID: 82609318994137446}
