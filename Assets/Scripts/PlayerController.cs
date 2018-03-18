@@ -63,7 +63,7 @@ public class PlayerController : MonoBehaviour {
     private GameObject grabbedObject; // The currently hold object is stored in here
 
     [Header("Ranges"), SerializeField] float shoutRange = 50f; // The radius of the circle, to reach enemies and alert them when shouting
-    [SerializeField] float stepRange = 1f; // The radius of the circle, to reach enemies and alert them when not crouching
+    [SerializeField] float walkNoiseRadius = 1f; // The radius of the circle, to reach enemies and alert them when not crouching
 
     [Header("Timer"), SerializeField] float detectionTime = 2f; // The amount of seconds it takes to get detected
     private float detectionCounter; // The acutal counter ticking down the seconds it takes to get detected
@@ -248,6 +248,10 @@ public class PlayerController : MonoBehaviour {
 
         // Apply the velocity to the transform position after its validity was checked
         CheckVelocity();
+        if(!bCrouching && velocity.x != 0f)
+        {
+            GameManager.Instance.MakeNoise(walkNoiseRadius, transform.position);
+        }
         transform.position += velocity;
     }
 

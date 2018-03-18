@@ -55,6 +55,13 @@ public class GeneralEnemy : MonoBehaviour
         set
         {
             pointToCheck = value;
+            if (alertedSound)
+            {
+                if (!alertedSound.isPlaying)
+                {
+                    alertedSound.PlayOneShot(alertedSound.clip);
+                }
+            }
         }
     }
 
@@ -102,6 +109,7 @@ public class GeneralEnemy : MonoBehaviour
 
     [Header("Sound"), SerializeField] AudioSource alarmSound; // The alarm sound to player when this enemy detected a player
     protected float alarmSoundVolume; // The alarm sound volume stored, to set it to this volume after the sound was fading out
+    [SerializeField] AudioSource alertedSound;
 
     #endregion
 

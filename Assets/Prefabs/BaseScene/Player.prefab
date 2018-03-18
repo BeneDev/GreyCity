@@ -153,8 +153,8 @@ MonoBehaviour:
   speed: 5
   crouchSpeedPenalty: 0.2
   wallSlideSpeed: 2.5
-  shoutRange: 50
-  stepRange: 1
+  shoutRange: 100
+  walkNoiseRadius: 25
   detectionTime: 10
   heartBeatAudioSource: {fileID: 82028807337787082}
 --- !u!212 &212318076680041088

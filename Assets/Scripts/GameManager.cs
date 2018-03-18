@@ -21,8 +21,6 @@ public class GameManager : MonoBehaviour {
 
     private LayerMask enemiesMask; // The LayerMask for the enemies to make only them hear the noises made
 
-    [Header("Sounds"), SerializeField] AudioSource soundNoise; // The sound being played when a noise is made by the player
-
     #endregion
 
     private void Awake()
@@ -102,6 +100,5 @@ public class GameManager : MonoBehaviour {
         {
             enemiesToAlert[i].gameObject.GetComponent<GeneralEnemy>().PointToCheck = emitterPos;
         }
-        soundNoise.PlayOneShot(soundNoise.clip);
     }
 }
