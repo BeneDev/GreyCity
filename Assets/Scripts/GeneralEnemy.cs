@@ -289,6 +289,11 @@ public class GeneralEnemy : MonoBehaviour
     {
         // Tick down the detection counter of the player, killing him when he stays in sight for too long
         player.GetComponent<PlayerController>().DetectionCounter -= Time.deltaTime;
+        if(player.GetComponent<PlayerController>().DetectionCounter <= 0f)
+        {
+            BDetected = false;
+            StartCoroutine(LookAround());
+        }
         // Walk towards the player when he is farther away than the stopping distance 
         if (player)
         {

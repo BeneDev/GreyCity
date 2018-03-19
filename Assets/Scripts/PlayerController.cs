@@ -70,12 +70,14 @@ public class PlayerController : MonoBehaviour {
     private float detectionCounter; // The acutal counter ticking down the seconds it takes to get detected
 
     [Header("Sound"), SerializeField] AudioSource heartBeatAudioSource; // The audio Source which stores the heart beat sound
+    [SerializeField] AudioSource shots; // The sound which is played when the player is being killed
 
     // All the booleans to store informations about the player 
     private bool bJumpable = true;
     private bool bOnWall = false;
     private bool bGrounded = false;
     private bool bCrouching = false;
+    private bool bDead = false;
 
     private Vector3 eyes; // The position of the eyes of the player
 
@@ -115,154 +117,174 @@ public class PlayerController : MonoBehaviour {
         // Set the detection counter to the time it takes to die after being detected
         detectionCounter = detectionTime;
     }
-    
+
+    private void OnDisable()
+    {
+        float startTime = Time.realtimeSinceStartup;
+        // Rotate the old player to show he ded
+        Quaternion newRotation = new Quaternion();
+        newRotation.eulerAngles = new Vector3(0f, 0f, 90f);
+        gameObject.transform.rotation = newRotation;
+        StartCoroutine(ShootAfterSeconds(1f));
+    }
+
     void Update () {
-        //if(input.Interact)
-        //{
-        //    print("Grab or throw");
-        //}
-        // Go in Crouching mode for as long as the player holds the button
-        if (input.Crouch)
+        if (!bDead)
         {
-            Crouch();
+            //if(input.Interact)
+            //{
+            //    print("Grab or throw");
+            //}
+            // Go in Crouching mode for as long as the player holds the button
+            if (input.Crouch)
+            {
+                Crouch();
+            }
+            else
+            {
+                bCrouching = false;
+                anim.SetBool("Crouching", false);
+            }
+            // When the player is not on a wall, there is nothing to pull up to
+            if (!bOnWall)
+            {
+                heightToPullUpTo = 0f;
+            }
+            // Flip the sprite in the direction of travel
+            Flip();
+            // When the player is in the sight of an enemy
+            if (RaycastForTag("EnemyLight", rays.detectRight, rays.detectLeft))
+            {
+                // Make the hearbeat sound go
+                heartBeatAudioSource.volume = 1f;
+                if (heartBeatAudioSource && !heartBeatAudioSource.isPlaying)
+                {
+                    heartBeatAudioSource.Play();
+                }
+                // Die when the detection counter ticked down
+                if (detectionCounter <= 0f)
+                {
+                    bDead = true;
+                }
+            }
+            // When not in sight of an enemy
+            else if (!RaycastForTag("EnemyLight", rays.detectLeft, rays.detectRight))
+            {
+                // Fade out the heartbeat sound
+                if (heartBeatAudioSource.isPlaying)
+                {
+                    Coroutine fadingOut = StartCoroutine(FadeOut(heartBeatAudioSource, 1f));
+                    if (fadingOut != null)
+                    {
+                        StopCoroutine(fadingOut);
+                    }
+                }
+                // Slowly increase the detection Counter again
+                if (detectionCounter < detectionTime)
+                {
+                    detectionCounter += Time.deltaTime / 2;
+                }
+                else if (detectionCounter > detectionTime)
+                {
+                    detectionCounter = detectionTime;
+                }
+            }
+            // Detect Checkpoint in range and activate him
+            if (RaycastForTag("Checkpoint", rays.detectRight, rays.detectLeft))
+            {
+                RaycastHit2D newCheckpoint = (RaycastHit2D)WhichRaycastForTag("Checkpoint", rays.detectRight, rays.detectLeft);
+                GameManager.Instance.currentCheckpoint = newCheckpoint.collider.gameObject.transform.position;
+            }
+            // Shout when the button is pressed
+            if (input.Shout)
+            {
+                GameManager.Instance.MakeNoise(shoutRange, transform.position);
+            }
         }
         else
         {
-            bCrouching = false;
-            anim.SetBool("Crouching", false);
-        }
-        // When the player is not on a wall, there is nothing to pull up to
-        if(!bOnWall)
-        {
-            heightToPullUpTo = 0f;
-        }
-        // Flip the sprite in the direction of travel
-        Flip();
-        // When the player is in the sight of an enemy
-        if (RaycastForTag("EnemyLight", rays.detectRight, rays.detectLeft))
-        {
-            // Make the hearbeat sound go
-            heartBeatAudioSource.volume = 1f;
-            if (heartBeatAudioSource && !heartBeatAudioSource.isPlaying)
-            {
-                heartBeatAudioSource.Play();
-            }
-            // Die when the detection counter ticked down
-            if (detectionCounter <= 0f)
-            {
-                Die();
-            }
-        }
-        // When not in sight of an enemy
-        else if(!RaycastForTag("EnemyLight", rays.detectLeft, rays.detectRight))
-        {
-            // Fade out the heartbeat sound
-            if (heartBeatAudioSource.isPlaying)
-            {
-                Coroutine fadingOut = StartCoroutine(FadeOut(heartBeatAudioSource, 1f));
-                if (fadingOut != null)
-                {
-                    StopCoroutine(fadingOut);
-                }
-            }
-            // Slowly increase the detection Counter again
-            if(detectionCounter < detectionTime)
-            {
-                detectionCounter += Time.deltaTime / 2;
-            }
-            else if(detectionCounter > detectionTime)
-            {
-                detectionCounter = detectionTime;
-            }
-        }
-        // Detect Checkpoint in range and activate him
-        if (RaycastForTag("Checkpoint", rays.detectRight, rays.detectLeft))
-        {
-            RaycastHit2D newCheckpoint = (RaycastHit2D)WhichRaycastForTag("Checkpoint", rays.detectRight, rays.detectLeft);
-            GameManager.Instance.currentCheckpoint = newCheckpoint.collider.gameObject.transform.position;
-        }
-        // Shout when the button is pressed
-        if(input.Shout)
-        {
-            GameManager.Instance.MakeNoise(shoutRange, transform.position);
+            Die();
         }
     }
 
     private void FixedUpdate()
     {
-        #region Raycast Initialization
-
-        // Update all the different raycast hit values to calculate physics
-        rays.bottomRight = Physics2D.Raycast(transform.position + Vector3.right * 0.1f + Vector3.down * 0.4f, Vector2.down, 0.35f, layersToCollideWith);
-        rays.bottomLeft = Physics2D.Raycast(transform.position + Vector3.right * -0.2f + Vector3.down * 0.4f, Vector2.down, 0.35f, layersToCollideWith);
-
-        rays.lowerRight = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.right * 0.4f, Vector2.left, 0.3f, layersToCollideWith);
-        rays.lowerLeft = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.left * 0.4f, Vector2.right, 0.3f, layersToCollideWith);
-
-        rays.upperRight = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.right * 0.4f, Vector2.left, 0.3f, layersToCollideWith);
-        rays.upperLeft = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.left * 0.4f, Vector2.right, 0.3f, layersToCollideWith);
-
-        rays.detectRight = Physics2D.Raycast(transform.position + Vector3.left * 0.4f, Vector2.right, 0.3f);
-        rays.detectLeft = Physics2D.Raycast(transform.position + Vector3.left * 0.4f, Vector2.right, 0.3f);
-
-        rays.top = Physics2D.Raycast(transform.position + Vector3.up * 0.4f, Vector2.up, 0.2f, layersToCollideWith);
-
-        anyPhysicsRaycast[0] = rays.bottomRight;
-        anyPhysicsRaycast[1] = rays.bottomLeft;
-        anyPhysicsRaycast[2] = rays.lowerLeft;
-        anyPhysicsRaycast[3] = rays.upperLeft;
-        anyPhysicsRaycast[4] = rays.lowerRight;
-        anyPhysicsRaycast[5] = rays.upperRight;
-        anyPhysicsRaycast[6] = rays.top;
-
-        #endregion
-
-        // Make player move slower when crouching and set the eye position down
-        if(bCrouching)
+        if (!bDead)
         {
-            actualSpeed = speed * crouchSpeedPenalty;
-            eyes = transform.position + Vector3.down * 0.2f;
+            #region Raycast Initialization
 
-        }
-        // Otherwise make him have the normal speed and normal eyeposition
-        else
-        {
-            actualSpeed = speed;
-            eyes = new Vector3(transform.position.x, transform.position.y + 0.8f);
-        }
+            // Update all the different raycast hit values to calculate physics
+            rays.bottomRight = Physics2D.Raycast(transform.position + Vector3.right * 0.1f + Vector3.down * 0.4f, Vector2.down, 0.35f, layersToCollideWith);
+            rays.bottomLeft = Physics2D.Raycast(transform.position + Vector3.right * -0.2f + Vector3.down * 0.4f, Vector2.down, 0.35f, layersToCollideWith);
 
-        // Set the horizontale velocity to the given input
-        velocity = new Vector3(input.Horizontal * actualSpeed * Time.fixedDeltaTime, velocity.y);
+            rays.lowerRight = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.right * 0.4f, Vector2.left, 0.3f, layersToCollideWith);
+            rays.lowerLeft = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.left * 0.4f, Vector2.right, 0.3f, layersToCollideWith);
 
-        CheckGrounded();
+            rays.upperRight = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.right * 0.4f, Vector2.left, 0.3f, layersToCollideWith);
+            rays.upperLeft = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.left * 0.4f, Vector2.right, 0.3f, layersToCollideWith);
 
-        // When the player is not crouching, allow him to jump
-        if (!bCrouching)
-        {
-            HandleJump();
-        }
+            rays.detectRight = Physics2D.Raycast(transform.position + Vector3.left * 0.4f, Vector2.right, 0.3f);
+            rays.detectLeft = Physics2D.Raycast(transform.position + Vector3.left * 0.4f, Vector2.right, 0.3f);
 
-        // Apply Gravity if not grounded
-        if (!bGrounded)
-        {
-            velocity.y -= gravity * Time.fixedDeltaTime;
-        }
+            rays.top = Physics2D.Raycast(transform.position + Vector3.up * 0.4f, Vector2.up, 0.2f, layersToCollideWith);
 
-        // Apply the velocity to the transform position after its validity was checked
-        CheckVelocity();
-        if(!bCrouching && velocity.x != 0f)
-        {
-            GameManager.Instance.MakeNoise(walkNoiseRadius, transform.position);
+            anyPhysicsRaycast[0] = rays.bottomRight;
+            anyPhysicsRaycast[1] = rays.bottomLeft;
+            anyPhysicsRaycast[2] = rays.lowerLeft;
+            anyPhysicsRaycast[3] = rays.upperLeft;
+            anyPhysicsRaycast[4] = rays.lowerRight;
+            anyPhysicsRaycast[5] = rays.upperRight;
+            anyPhysicsRaycast[6] = rays.top;
+
+            #endregion
+
+            // Make player move slower when crouching and set the eye position down
+            if (bCrouching)
+            {
+                actualSpeed = speed * crouchSpeedPenalty;
+                eyes = transform.position + Vector3.down * 0.2f;
+
+            }
+            // Otherwise make him have the normal speed and normal eyeposition
+            else
+            {
+                actualSpeed = speed;
+                eyes = new Vector3(transform.position.x, transform.position.y + 0.8f);
+            }
+
+            // Set the horizontale velocity to the given input
+            velocity = new Vector3(input.Horizontal * actualSpeed * Time.fixedDeltaTime, velocity.y);
+
+            CheckGrounded();
+
+            // When the player is not crouching, allow him to jump
+            if (!bCrouching)
+            {
+                HandleJump();
+            }
+
+            // Apply Gravity if not grounded
+            if (!bGrounded)
+            {
+                velocity.y -= gravity * Time.fixedDeltaTime;
+            }
+
+            // Apply the velocity to the transform position after its validity was checked
+            CheckVelocity();
+            if (!bCrouching && velocity.x != 0f)
+            {
+                GameManager.Instance.MakeNoise(walkNoiseRadius, transform.position);
+            }
+            if (velocity.x > 0.0001f || velocity.x < -0.0001f)
+            {
+                anim.SetFloat("Velocity", 1f);
+            }
+            else
+            {
+                anim.SetFloat("Velocity", 0f);
+            }
+            transform.position += velocity;
         }
-        if(velocity.x > 0.0001f || velocity.x < -0.0001f)
-        {
-            anim.SetFloat("Velocity", 1f);
-        }
-        else
-        {
-            anim.SetFloat("Velocity", 0f);
-        }
-        transform.position += velocity;
     }
 
     //private void OnDrawGizmos()
@@ -273,7 +295,21 @@ public class PlayerController : MonoBehaviour {
 
 
     #region HelperMethods
-    
+
+    IEnumerator ShootAfterSeconds(float seconds)
+    {
+        yield return new WaitForSeconds(seconds);
+        if (!shots.isPlaying)
+        {
+            shots.PlayOneShot(shots.clip);
+        }
+    }
+
+    /// <summary>
+    /// Return only the value and not the algebraic sign
+    /// </summary>
+    /// <param name="number"></param>
+    /// <returns></returns>
     private float GetValue(float number)
     {
         if(number > 0f)
@@ -296,12 +332,9 @@ public class PlayerController : MonoBehaviour {
     public void Die()
     {
         heartBeatAudioSource.Stop();
-        // Rotate the old player to show he ded
-        Quaternion newRotation = new Quaternion();
-        newRotation.eulerAngles = new Vector3(0f, 0f, 90f);
-        gameObject.transform.rotation = newRotation;
         // Delete the reference to this gameObject on the camera to cause the next player to get activated
         cam.GetComponentInParent<FollowPlayer>().player = null;
+
         // Disable the script
         gameObject.GetComponent<PlayerController>().enabled = false;
     }
