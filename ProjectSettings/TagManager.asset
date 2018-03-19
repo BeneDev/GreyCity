@@ -10,6 +10,7 @@ TagManager:
   - Rain
   - GroundGate
   - Enemy
+  - Sun
   layers:
   - Default
   - TransparentFX

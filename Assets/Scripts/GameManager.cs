@@ -21,6 +21,16 @@ public class GameManager : MonoBehaviour {
 
     private LayerMask enemiesMask; // The LayerMask for the enemies to make only them hear the noises made
 
+    private GameObject sun;
+    private float normalSunIntensity;
+
+    [SerializeField] float flashMaxBetween = 30f;
+    [SerializeField] float flashMinBetween = 1f;
+
+    [SerializeField] float flashLightDecreaseFactor = 1f;
+
+    private float flashCounter; // The timer to tick down and create a lightning strike
+
     #endregion
 
     private void Awake()
@@ -45,6 +55,9 @@ public class GameManager : MonoBehaviour {
         // Initialize the LayerMask for the enemies
         int layerEnemies = LayerMask.NameToLayer("Enemies");
         enemiesMask = 1 << layerEnemies;
+        sun = GameObject.FindGameObjectWithTag("Sun");
+        normalSunIntensity = sun.GetComponent<Light>().intensity;
+        flashCounter = Random.Range(flashMinBetween, flashMaxBetween);
     }
 
     private void Start()
@@ -63,6 +76,34 @@ public class GameManager : MonoBehaviour {
         {
             GetNextPlayer();
         }
+        //// Play the sound with a random volume when the counter is zero or lower 
+        //if (flashCounter <= 0f)
+        //{
+        //    sun.GetComponent<Light>().intensity = 4f;
+        //    StartCoroutine(ResetSun());
+        //}
+        //// Otherwise tick down the counter
+        //else if (flashCounter > 0f)
+        //{
+        //    flashCounter -= Time.deltaTime;
+        //}
+    }
+
+    public void LightningStrike()
+    {
+        sun.GetComponent<Light>().intensity = 3f;
+        StartCoroutine(ResetSun());
+    }
+
+    IEnumerator ResetSun()
+    {
+        yield return new WaitForSeconds(0.15f);
+        while (sun.GetComponent<Light>().intensity > normalSunIntensity)
+        {
+            sun.GetComponent<Light>().intensity = flashLightDecreaseFactor * Time.deltaTime;
+            yield return new WaitForEndOfFrame();
+        }
+        //flashCounter = Random.Range(flashMinBetween, flashMaxBetween);
     }
 
     /// <summary>

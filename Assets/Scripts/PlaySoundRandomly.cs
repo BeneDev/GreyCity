@@ -23,6 +23,10 @@ public class PlaySoundRandomly : MonoBehaviour {
         // Play the sound with a random volume when the counter is zero or lower 
 		if(counter <= 0f)
         {
+            if(audioSource.clip.name == "ThunderLouder")
+            {
+                GameManager.Instance.LightningStrike();
+            }
             audioSource.volume = Random.Range(0.4f, 1f);
             audioSource.Play();
             counter = Random.Range(minTimeInBetween, maxTimeInBetween);
