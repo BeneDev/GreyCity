@@ -271,7 +271,7 @@ public class PlayerController : MonoBehaviour {
 
             // Apply the velocity to the transform position after its validity was checked
             CheckVelocity();
-            if (!bCrouching && velocity.x != 0f)
+            if (!bCrouching && velocity.x != 0f && bGrounded)
             {
                 GameManager.Instance.MakeNoise(walkNoiseRadius, transform.position);
             }
@@ -378,13 +378,6 @@ public class PlayerController : MonoBehaviour {
         {
             velocity.y = veloYLimit;
         }
-
-        // Check for possible Wallslide
-        if (bOnWall && !bGrounded && HoldingInDirection() && velocity.y < 0)
-        {
-            velocity.y = - wallSlideSpeed * Time.fixedDeltaTime;
-        }
-
         // Check if something is above the player and let him bounce down again relative to the force he went up with
         if (RaycastForTag("Ground", rays.top) && velocity.y > 0)
         {
@@ -418,23 +411,6 @@ public class PlayerController : MonoBehaviour {
         }
         // Otherwise set bOnwall to false and return false
         bOnWall = false;
-        return false;
-    }
-
-    /// <summary>
-    /// Checks if the player is holding the direction, hes facing in
-    /// </summary>
-    /// <returns> True if the player is holding in the direction, he is facing. False if he is not.</returns>
-    private bool HoldingInDirection()
-    {
-        if (input.Horizontal < 0 && rend.flipX == true)
-        {
-            return true;
-        }
-        else if (input.Horizontal > 0 && rend.flipX == false)
-        {
-            return true;
-        }
         return false;
     }
 
