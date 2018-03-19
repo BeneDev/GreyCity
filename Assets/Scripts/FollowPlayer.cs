@@ -9,6 +9,8 @@ using UnityEngine;
 public class FollowPlayer : MonoBehaviour {
 
     public GameObject player;
+
+    [SerializeField] float speed = 1f;
     
 	void Start() {
         // Subscribe to the delegate of the gamemaker, broadcasting when a new player is activated
@@ -19,8 +21,12 @@ public class FollowPlayer : MonoBehaviour {
         // Follow the player if there is one referenced in the field
         if (player)
         {
-            transform.position = player.transform.position;
-            //transform.position += Vector3.Lerp(player.transform.position, transform.position, 100f);
+            // Make smooth transition to the currently active player
+            Vector3 newPos = transform.position;
+            newPos.y = Mathf.Lerp(transform.position.y, player.transform.position.y, speed * Time.deltaTime);
+            newPos.x = Mathf.Lerp(transform.position.x, player.transform.position.x, speed * Time.deltaTime);
+
+            transform.position = newPos;
         }
 	}
 
