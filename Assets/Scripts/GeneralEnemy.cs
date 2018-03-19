@@ -100,6 +100,16 @@ public class GeneralEnemy : MonoBehaviour
     }
     private Raycasts rays;
 
+    // The state machine for the enemy
+    enum PlayerState
+    {
+        patroling,
+        detected,
+        alerted,
+        lookAround
+    }
+    PlayerState state = PlayerState.patroling;
+
     // Booleans storing informations about the enemy
     protected bool bLookLeft = false;   // Stores if the enemy looks to the left
     protected bool bDetected = false; // Stores if this enemy detected the player
@@ -143,6 +153,48 @@ public class GeneralEnemy : MonoBehaviour
         }
         // Get the inital alarm sound volume
         alarmSoundVolume = alarmSound.volume;
+    }
+
+    protected virtual void GeneralStateBehavior()
+    {
+        #region Raycast Initialization
+
+        // Update all of the rays, used to check for walls besides the enemy
+        rays.left = Physics2D.Raycast(transform.position + new Vector3(coll.bounds.extents.x, 0.0f), Vector2.right, 0.2f, layersToCollideWith);
+        rays.right = Physics2D.Raycast(transform.position + new Vector3(-coll.bounds.extents.x, 0.0f), Vector2.left, 0.2f, layersToCollideWith);
+
+        rays.upperLeft = Physics2D.Raycast(transform.position + new Vector3(coll.bounds.extents.x, 0.4f), Vector2.right, 0.2f, layersToCollideWith);
+        rays.upperRight = Physics2D.Raycast(transform.position + new Vector3(-coll.bounds.extents.x, 0.4f), Vector2.left, 0.2f, layersToCollideWith);
+
+        #endregion
+        // Update the Vector, pointing towards the player and the field which stores if the player is in sight or not
+        if (player)
+        {
+            toPlayer = player.transform.position - transform.position;
+            if (eyes.GetComponent<BoxCollider2D>().bounds.Contains(player.transform.position))
+            {
+                bPlayerInSight = true;
+            }
+            else
+            {
+                bPlayerInSight = false;
+            }
+        }
+        switch (state)
+        {
+            case PlayerState.patroling:
+                SimpleMove();
+                break;
+            case PlayerState.detected:
+                DetectedBehavior();
+                break;
+            case PlayerState.alerted:
+                AlertedBehavior();
+                break;
+            case PlayerState.lookAround:
+                LookAround();
+                break;
+        }
     }
 
     /// <summary>
@@ -321,6 +373,12 @@ public class GeneralEnemy : MonoBehaviour
 
     #endregion
 
+    protected void WaitForSeconds(float seconds)
+    {
+        float startTime = Time.time;
+
+    }
+
     /// <summary>
     /// Make the enemy give up the searching for the source of a sound he hears
     /// </summary>
@@ -331,7 +389,7 @@ public class GeneralEnemy : MonoBehaviour
         // Wait for given seconds until the point to walk to is reset to being zero
         yield return new WaitForSeconds(seconds);
         pointToCheck = Vector3.zero;
-        StartCoroutine(LookAround());
+        //StartCoroutine(LookAround());
     }
 
     /// <summary>

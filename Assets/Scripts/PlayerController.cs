@@ -480,20 +480,7 @@ public class PlayerController : MonoBehaviour {
     {
         if (input.Jump == 2 && bGrounded)
         {
-            if (!bOnWall)
-            {
-                Jump();
-            }
-            else if(bOnWall)
-            {
-                //Play pull up animation
-                //RaycastHit2D hit = (RaycastHit2D)WhichRaycastForTag("Ground", rays.upperLeft, rays.lowerLeft, rays.lowerRight, rays.upperRight);
-                //if(hit.collider != null)
-                //{
-                //    heightToPullUpTo = hit.collider.bounds.size.y;
-                //    transform.position += Vector3.up * heightToPullUpTo;
-                //}
-            }
+            Jump();
         }
         // Make the player fall less fast when still holding the jump button
         if (input.Jump == 1 && !bGrounded)

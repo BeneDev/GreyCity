@@ -20,6 +20,7 @@ public class FollowPlayer : MonoBehaviour {
         if (player)
         {
             transform.position = player.transform.position;
+            //transform.position += Vector3.Lerp(player.transform.position, transform.position, 100f);
         }
 	}
 
