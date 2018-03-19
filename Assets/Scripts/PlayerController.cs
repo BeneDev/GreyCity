@@ -54,6 +54,7 @@ public class PlayerController : MonoBehaviour {
     private SpriteRenderer rend;
     private AudioSource audioSource;
 
+    private Animator anim;
     private Camera cam;
 
     // Several LayerMasks
@@ -102,6 +103,7 @@ public class PlayerController : MonoBehaviour {
         // Get the components of the player to use
         input = GetComponent<PlayerInput>();
         rend = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>();
         // Get the camera to delete this object from the player field there, when this character died
         cam = Camera.main;
         // Get the layerMask for collision
@@ -127,7 +129,7 @@ public class PlayerController : MonoBehaviour {
         else
         {
             bCrouching = false;
-            rend.flipY = false;
+            anim.SetBool("Crouching", false);
         }
         // When the player is not on a wall, there is nothing to pull up to
         if(!bOnWall)
@@ -191,17 +193,17 @@ public class PlayerController : MonoBehaviour {
         #region Raycast Initialization
 
         // Update all the different raycast hit values to calculate physics
-        rays.bottomRight = Physics2D.Raycast(transform.position + Vector3.right * 0.1f + Vector3.down * 0.4f, Vector2.down, 0.2f, layersToCollideWith);
-        rays.bottomLeft = Physics2D.Raycast(transform.position + Vector3.right * -0.2f + Vector3.down * 0.4f, Vector2.down, 0.2f, layersToCollideWith);
+        rays.bottomRight = Physics2D.Raycast(transform.position + Vector3.right * 0.1f + Vector3.down * 0.4f, Vector2.down, 0.35f, layersToCollideWith);
+        rays.bottomLeft = Physics2D.Raycast(transform.position + Vector3.right * -0.2f + Vector3.down * 0.4f, Vector2.down, 0.35f, layersToCollideWith);
 
-        rays.lowerRight = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.right * 0.4f, Vector2.left, 0.2f, layersToCollideWith);
-        rays.lowerLeft = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.left * 0.4f, Vector2.right, 0.2f, layersToCollideWith);
+        rays.lowerRight = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.right * 0.4f, Vector2.left, 0.3f, layersToCollideWith);
+        rays.lowerLeft = Physics2D.Raycast(transform.position + Vector3.up * -0.4f + Vector3.left * 0.4f, Vector2.right, 0.3f, layersToCollideWith);
 
-        rays.upperRight = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.right * 0.4f, Vector2.left, 0.2f, layersToCollideWith);
-        rays.upperLeft = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.left * 0.4f, Vector2.right, 0.2f, layersToCollideWith);
+        rays.upperRight = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.right * 0.4f, Vector2.left, 0.3f, layersToCollideWith);
+        rays.upperLeft = Physics2D.Raycast(transform.position + Vector3.up * 0.3f + Vector3.left * 0.4f, Vector2.right, 0.3f, layersToCollideWith);
 
-        rays.detectRight = Physics2D.Raycast(transform.position + Vector3.left * 0.4f, Vector2.right, 0.2f);
-        rays.detectLeft = Physics2D.Raycast(transform.position + Vector3.left * 0.4f, Vector2.right, 0.2f);
+        rays.detectRight = Physics2D.Raycast(transform.position + Vector3.left * 0.4f, Vector2.right, 0.3f);
+        rays.detectLeft = Physics2D.Raycast(transform.position + Vector3.left * 0.4f, Vector2.right, 0.3f);
 
         rays.top = Physics2D.Raycast(transform.position + Vector3.up * 0.4f, Vector2.up, 0.2f, layersToCollideWith);
 
@@ -252,6 +254,14 @@ public class PlayerController : MonoBehaviour {
         {
             GameManager.Instance.MakeNoise(walkNoiseRadius, transform.position);
         }
+        if(velocity.x > 0.0001f || velocity.x < -0.0001f)
+        {
+            anim.SetFloat("Velocity", 1f);
+        }
+        else
+        {
+            anim.SetFloat("Velocity", 0f);
+        }
         transform.position += velocity;
     }
 
@@ -264,6 +274,22 @@ public class PlayerController : MonoBehaviour {
 
     #region HelperMethods
     
+    private float GetValue(float number)
+    {
+        if(number > 0f)
+        {
+            return number;
+        }
+        if(number < 0f)
+        {
+            return -number;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
     /// <summary>
     /// Necessary changes to make the player die and a new one to be activated
     /// </summary>
@@ -507,7 +533,7 @@ public class PlayerController : MonoBehaviour {
     private void Crouch()
     {
         bCrouching = true;
-        rend.flipY = true;
+        anim.SetBool("Crouching", true);
     }
 
     /// <summary>
