@@ -275,14 +275,15 @@ public class PlayerController : MonoBehaviour {
             {
                 GameManager.Instance.MakeNoise(walkNoiseRadius, transform.position);
             }
-            if (velocity.x > 0.0001f || velocity.x < -0.0001f)
-            {
-                anim.SetFloat("Velocity", 1f);
-            }
-            else
-            {
-                anim.SetFloat("Velocity", 0f);
-            }
+            anim.SetFloat("Velocity", GetValue(velocity.x * 100f));
+            //if (velocity.x > 0.0001f || velocity.x < -0.0001f)
+            //{
+            //    anim.SetFloat("Velocity", 1f);
+            //}
+            //else
+            //{
+            //    anim.SetFloat("Velocity", 0f);
+            //}
             transform.position += velocity;
         }
     }
@@ -531,6 +532,7 @@ public class PlayerController : MonoBehaviour {
 
     private void Jump()
     {
+        anim.SetBool("Jumping", true);
         velocity = new Vector3(0f, jumpForce * Time.deltaTime);
     }
 
@@ -559,6 +561,10 @@ public class PlayerController : MonoBehaviour {
         if (RaycastForTag("Ground", rays.bottomLeft, rays.bottomRight))
         {
             bGrounded = true;
+            if(anim.GetBool("Jumping") == true)
+            {
+                anim.SetBool("Jumping", false);
+            }
         }
         // Make the player fall through ground gates when the player holds down the left analog stick or walk over the ground gates if he chooses not to hold down the stick
         else if (RaycastForTag("GroundGate", rays.bottomRight, rays.bottomLeft))
@@ -566,6 +572,10 @@ public class PlayerController : MonoBehaviour {
             if(input.Vertical >= 0 && fellThroughCounter <= 0f)
             {
                 bGrounded = true;
+                if (anim.GetBool("Jumping") == true)
+                {
+                    anim.SetBool("Jumping", false);
+                }
             }
             else
             {
