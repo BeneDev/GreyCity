@@ -78,6 +78,7 @@ public class PlayerController : MonoBehaviour {
     private bool bGrounded = false;
     private bool bCrouching = false;
     private bool bDead = false;
+    public bool hasMoved = false; // Lets the cam zoom out if the player hasnt moved yet
 
     private Vector3 eyes; // The position of the eyes of the player
 
@@ -250,6 +251,11 @@ public class PlayerController : MonoBehaviour {
             {
                 actualSpeed = speed;
                 eyes = new Vector3(transform.position.x, transform.position.y + 0.8f);
+            }
+
+            if(input.Horizontal != 0f && !hasMoved)
+            {
+                hasMoved = true;
             }
 
             // Set the horizontale velocity to the given input

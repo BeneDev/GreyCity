@@ -7,17 +7,36 @@ using UnityEngine;
 /// Attach this script to a game object to make it follow the currently activated player
 /// </summary>
 public class FollowPlayer : MonoBehaviour {
-
-    public GameObject player;
-
-    [SerializeField] float speed = 1f;
     
-	void Start() {
+    private float normalCamZoom;
+    public GameObject player;
+    Camera cam;
+    
+    [SerializeField] float speed = 1f;
+    [SerializeField] float zoomInSpeed = 1f;
+    [SerializeField] float zoomedOutValue = 15f;
+
+    private void Awake()
+    {
+        cam = Camera.main;
+        normalCamZoom = cam.orthographicSize;
+    }
+
+    void Start() {
         // Subscribe to the delegate of the gamemaker, broadcasting when a new player is activated
         GameManager.Instance.OnPlayerChanged += GetNewPlayer;
-	}
+    }
 	
 	void Update () {
+        if(!player.GetComponent<PlayerController>().hasMoved)
+        {
+            cam.orthographicSize = zoomedOutValue;
+        }
+        else if(cam.orthographicSize != normalCamZoom)
+        {
+            float newZoom = Mathf.Lerp(cam.orthographicSize, normalCamZoom, zoomInSpeed * Time.deltaTime);
+            cam.orthographicSize = newZoom;
+        }
         // Follow the player if there is one referenced in the field
         if (player)
         {
