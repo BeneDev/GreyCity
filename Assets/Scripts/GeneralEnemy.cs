@@ -40,6 +40,11 @@ public class GeneralEnemy : MonoBehaviour
             if(value == true)
             {
                 durationUntilNotDetectedCounter = durationUntilNotDetected;
+                anim.SetBool("Detected", true);
+            }
+            else
+            {
+                anim.SetBool("Detected", false);
             }
             bDetected = value;
         }
@@ -89,6 +94,7 @@ public class GeneralEnemy : MonoBehaviour
     // Components needed to store
     protected BoxCollider2D coll;
     protected SpriteRenderer rend;
+    protected Animator anim;
 
     // Raycasts to move accordingly in the scene
     struct Raycasts
@@ -131,6 +137,7 @@ public class GeneralEnemy : MonoBehaviour
         // Get needed Components
         coll = GetComponent<BoxCollider2D>();
         rend = GetComponent<SpriteRenderer>();
+        anim = GetComponent<Animator>();
         // Get needed LayerMasks
         int groundLayer = LayerMask.NameToLayer("Ground");
         int defaultLayer = LayerMask.NameToLayer("Default");
@@ -357,6 +364,7 @@ public class GeneralEnemy : MonoBehaviour
         {
             BLookLeft = true;
         }
+        anim.SetTrigger("LookAround");
         // Wait a seconds before the enemy will carefully walk towards the point
         yield return new WaitForSeconds(1f);
         if (!eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck))

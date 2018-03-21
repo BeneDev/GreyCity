@@ -25,6 +25,7 @@ GameObject:
   - component: {fileID: 50597890158773532}
   - component: {fileID: 82609318994137446}
   - component: {fileID: 82864357622441410}
+  - component: {fileID: 95988991001550232}
   m_Layer: 9
   m_Name: NormalGuard (1)
   m_TagString: Untagged
@@ -100,7 +101,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1651017960915800}
   m_LocalRotation: {x: 0.09431201, y: 0.6527093, z: -0.09762715, w: 0.74534875}
-  m_LocalPosition: {x: -2.88, y: 0.485, z: -1.113}
+  m_LocalPosition: {x: -2.88, y: 0.13, z: -1.113}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4733711164336294}
@@ -365,6 +366,23 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 0
+--- !u!95 &95988991001550232
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1089220793732252}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: 5595c18abb039fe4880c7998f96e5d75, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
 --- !u!108 &108753934840556390
 Light:
   m_ObjectHideFlags: 1
