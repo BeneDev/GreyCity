@@ -285,22 +285,22 @@ public class PlayerController : MonoBehaviour {
             }
             anim.SetFloat("Velocity", GetValue(velocity.x * 100f));
 
-            if (RaycastForTag("Ground", rays.slopeLeft, rays.slopeRight))
-            {
-                RaycastHit2D hit = (RaycastHit2D)WhichRaycastForTag("Ground", rays.slopeRight, rays.slopeLeft);
-                float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
-                print("slope: " + slopeAngle.ToString());
-            }
+            //if (RaycastForTag("Ground", rays.slopeLeft, rays.slopeRight))
+            //{
+            //    RaycastHit2D hit = (RaycastHit2D)WhichRaycastForTag("Ground", rays.slopeRight, rays.slopeLeft);
+            //    float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
+            //    print("slope: " + slopeAngle.ToString());
+            //}
 
             transform.position += velocity;
         }
     }
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawRay(transform.position + Vector3.up * -0.7f + Vector3.left * 0.2f, Vector3.left * 0.4f);
-        Gizmos.DrawRay(transform.position + Vector3.up * -0.7f + Vector3.right * 0.2f, Vector3.right * 0.4f);
-    }
+    //private void OnDrawGizmos()
+    //{
+    //    Gizmos.DrawRay(transform.position + Vector3.up * -0.7f + Vector3.left * 0.2f, Vector3.left * 0.4f);
+    //    Gizmos.DrawRay(transform.position + Vector3.up * -0.7f + Vector3.right * 0.2f, Vector3.right * 0.4f);
+    //}
 
 
     #region HelperMethods
