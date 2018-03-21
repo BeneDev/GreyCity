@@ -68,6 +68,7 @@ public class PlayerController : MonoBehaviour {
 
     [Header("Timer"), SerializeField] float detectionTime = 2f; // The amount of seconds it takes to get detected
     private float detectionCounter; // The acutal counter ticking down the seconds it takes to get detected
+    private float idleCounter;
 
     [Header("Sprites"), SerializeField] Sprite corpseSprite;
 
@@ -119,6 +120,8 @@ public class PlayerController : MonoBehaviour {
         layersToCollideWith = 1 << layerGround;
         layersDetectingThePlayer = 1 << layerEnemyLight;
 
+        idleCounter = Random.Range(5f, 10f);
+
         // Set the detection counter to the time it takes to die after being detected
         detectionCounter = detectionTime;
     }
@@ -129,6 +132,19 @@ public class PlayerController : MonoBehaviour {
     }
 
     void Update () {
+        if (anim.GetCurrentAnimatorStateInfo(0).IsName("Idling"))
+        {
+            if (idleCounter <= 0f)
+            {
+                anim.SetTrigger("Idle2");
+                idleCounter = Random.Range(5f, 10f);
+            }
+            // Otherwise tick down the counter
+            else if (idleCounter > 0f)
+            {
+                idleCounter -= Time.deltaTime;
+            }
+        }
         if (!bDead)
         {
             //if(input.Interact)
