@@ -36,9 +36,10 @@ GameObject:
   m_Component:
   - component: {fileID: 4648645652250396}
   - component: {fileID: 212177886549623436}
-  m_Layer: 0
+  - component: {fileID: 60816842963198320}
+  m_Layer: 8
   m_Name: House_Start
-  m_TagString: Untagged
+  m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -50,7 +51,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1673956152639438}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -11.49, y: 2.92, z: 0}
+  m_LocalPosition: {x: 126.50693, y: 2.89, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4725761262376310}
@@ -70,6 +71,44 @@ Transform:
   m_Father: {fileID: 4648645652250396}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!60 &60816842963198320
+PolygonCollider2D:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1673956152639438}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 7, y: 8.75}
+    newSize: {x: 7, y: 8.75}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Points:
+    m_Paths:
+    - - {x: 2.3891144, y: 3.9881423}
+      - {x: 0.3804474, y: 3.6208346}
+      - {x: -2.830452, y: 3.1403859}
+      - {x: -2.9, y: 3.125}
+      - {x: -2.9, y: 2.7250001}
+      - {x: -2.8, y: 2.7250001}
+      - {x: -2.2832794, y: 2.766874}
+      - {x: -2.3062897, y: 2.508928}
+      - {x: -2.7110977, y: 2.8835948}
+      - {x: -2.160263, y: 2.679621}
+      - {x: 3, y: 3.7051156}
+      - {x: 3.360382, y: 3.7873108}
+      - {x: 3.317871, y: 4.027463}
+      - {x: 3.2391052, y: 4.0076923}
 --- !u!212 &212177886549623436
 SpriteRenderer:
   m_ObjectHideFlags: 1
