@@ -103,6 +103,7 @@ public class GameManager : MonoBehaviour {
             sun.GetComponent<Light>().intensity = flashLightDecreaseFactor * Time.deltaTime;
             yield return new WaitForEndOfFrame();
         }
+        sun.GetComponent<Light>().intensity = normalSunIntensity;
         //flashCounter = Random.Range(flashMinBetween, flashMaxBetween);
     }
 
