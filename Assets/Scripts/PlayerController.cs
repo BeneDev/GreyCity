@@ -121,12 +121,7 @@ public class PlayerController : MonoBehaviour {
 
     private void OnDisable()
     {
-        float startTime = Time.realtimeSinceStartup;
-        // Rotate the old player to show he ded
-        Quaternion newRotation = new Quaternion();
-        newRotation.eulerAngles = new Vector3(0f, 0f, 90f);
-        gameObject.transform.rotation = newRotation;
-        StartCoroutine(ShootAfterSeconds(1f));
+        StartCoroutine(DieAfterSeconds(1f));
     }
 
     void Update () {
@@ -303,13 +298,23 @@ public class PlayerController : MonoBehaviour {
 
     #region HelperMethods
 
-    IEnumerator ShootAfterSeconds(float seconds)
+    IEnumerator DieAfterSeconds(float seconds)
     {
         yield return new WaitForSeconds(seconds);
+
+        // Delete the reference to this gameObject on the camera to cause the next player to get activated
+        cam.GetComponentInParent<FollowPlayer>().player = null;
+
+        //// Rotate the old player to show he ded
+        //Quaternion newRotation = new Quaternion();
+        //newRotation.eulerAngles = new Vector3(0f, 0f, 90f);
+        //gameObject.transform.rotation = newRotation;
+        // TODO set sprite to dead player
         if (!shots.isPlaying)
         {
             shots.PlayOneShot(shots.clip);
         }
+        print("Still running");
     }
 
     /// <summary>
@@ -339,8 +344,8 @@ public class PlayerController : MonoBehaviour {
     public void Die()
     {
         heartBeatAudioSource.Stop();
-        // Delete the reference to this gameObject on the camera to cause the next player to get activated
-        cam.GetComponentInParent<FollowPlayer>().player = null;
+
+        anim.SetTrigger("Detected");
 
         // Disable the script
         gameObject.GetComponent<PlayerController>().enabled = false;
