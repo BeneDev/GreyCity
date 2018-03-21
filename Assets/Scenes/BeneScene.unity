@@ -35,7 +35,7 @@ RenderSettings:
   m_DefaultReflectionMode: 0
   m_DefaultReflectionResolution: 128
   m_ReflectionBounces: 1
-  m_ReflectionIntensity: 1
+  m_ReflectionIntensity: 0
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
   m_IndirectSpecularColor: {r: 0, g: 0, b: 0, a: 1}
@@ -219,30 +219,25 @@ Prefab:
       propertyPath: m_RootOrder
       value: 5
       objectReference: {fileID: 0}
-    - target: {fileID: 114020094972596960, guid: aa4ff34970f86e14487e3a7dd61cfccc,
-        type: 2}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 114231971982374486, guid: aa4ff34970f86e14487e3a7dd61cfccc,
-        type: 2}
-      propertyPath: zoomInSpeed
-      value: 0.5
-      objectReference: {fileID: 0}
     - target: {fileID: 20256355922961146, guid: aa4ff34970f86e14487e3a7dd61cfccc,
         type: 2}
       propertyPath: m_BackGroundColor.r
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 20256355922961146, guid: aa4ff34970f86e14487e3a7dd61cfccc,
         type: 2}
       propertyPath: m_BackGroundColor.g
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 20256355922961146, guid: aa4ff34970f86e14487e3a7dd61cfccc,
         type: 2}
       propertyPath: m_BackGroundColor.b
-      value: 0
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 20256355922961146, guid: aa4ff34970f86e14487e3a7dd61cfccc,
+        type: 2}
+      propertyPath: m_CullingMask.m_Bits
+      value: 4294959103
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: aa4ff34970f86e14487e3a7dd61cfccc, type: 2}
@@ -3903,7 +3898,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4419672804574250, guid: 8d101b07613290949b5ddde68a4363dd, type: 2}
       propertyPath: m_LocalPosition.y
-      value: -5.52
+      value: -6.14
       objectReference: {fileID: 0}
     - target: {fileID: 4419672804574250, guid: 8d101b07613290949b5ddde68a4363dd, type: 2}
       propertyPath: m_LocalPosition.z
@@ -4054,11 +4049,6 @@ Prefab:
     - target: {fileID: 1303057978648646, guid: 48ffb8185d0b6ff4f82d7660ac96989a, type: 2}
       propertyPath: m_Name
       value: Lantern_Side (3)
-      objectReference: {fileID: 0}
-    - target: {fileID: 212726900173604848, guid: 48ffb8185d0b6ff4f82d7660ac96989a,
-        type: 2}
-      propertyPath: m_SortingOrder
-      value: -100
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 48ffb8185d0b6ff4f82d7660ac96989a, type: 2}
@@ -4423,7 +4413,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4419672804574250, guid: 8d101b07613290949b5ddde68a4363dd, type: 2}
       propertyPath: m_LocalPosition.y
-      value: -4.73
+      value: -6.64
       objectReference: {fileID: 0}
     - target: {fileID: 4419672804574250, guid: 8d101b07613290949b5ddde68a4363dd, type: 2}
       propertyPath: m_LocalPosition.z
@@ -5011,16 +5001,6 @@ Prefab:
     - target: {fileID: 4013195406006250, guid: c7ac1eaa0d2495a4ebe3ac6eebaaf57a, type: 2}
       propertyPath: m_RootOrder
       value: 9
-      objectReference: {fileID: 0}
-    - target: {fileID: 198255462089086052, guid: c7ac1eaa0d2495a4ebe3ac6eebaaf57a,
-        type: 2}
-      propertyPath: CollisionModule.collidesWith.m_Bits
-      value: 4294959560
-      objectReference: {fileID: 0}
-    - target: {fileID: 198255462089086052, guid: c7ac1eaa0d2495a4ebe3ac6eebaaf57a,
-        type: 2}
-      propertyPath: randomSeed
-      value: -73250946
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: c7ac1eaa0d2495a4ebe3ac6eebaaf57a, type: 2}
@@ -6582,7 +6562,7 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4815167443266786, guid: d4e01edc99674fa4aae0974c1de28ced, type: 2}
       propertyPath: m_LocalPosition.x
-      value: -23.67
+      value: -90.93
       objectReference: {fileID: 0}
     - target: {fileID: 4815167443266786, guid: d4e01edc99674fa4aae0974c1de28ced, type: 2}
       propertyPath: m_LocalPosition.y
@@ -7362,6 +7342,11 @@ Prefab:
         type: 2}
       propertyPath: m_Pivot.y
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 114263845580760924, guid: dc4f04a50c6426644956f8fec73aa6e9,
+        type: 2}
+      propertyPath: m_Text
+      value: Movement
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: dc4f04a50c6426644956f8fec73aa6e9, type: 2}
