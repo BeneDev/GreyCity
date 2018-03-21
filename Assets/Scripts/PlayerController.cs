@@ -69,6 +69,8 @@ public class PlayerController : MonoBehaviour {
     [Header("Timer"), SerializeField] float detectionTime = 2f; // The amount of seconds it takes to get detected
     private float detectionCounter; // The acutal counter ticking down the seconds it takes to get detected
 
+    [Header("Sprites"), SerializeField] Sprite corpseSprite;
+
     [Header("Sound"), SerializeField] AudioSource heartBeatAudioSource; // The audio Source which stores the heart beat sound
     [SerializeField] AudioSource shots; // The sound which is played when the player is being killed
 
@@ -309,7 +311,9 @@ public class PlayerController : MonoBehaviour {
         //Quaternion newRotation = new Quaternion();
         //newRotation.eulerAngles = new Vector3(0f, 0f, 90f);
         //gameObject.transform.rotation = newRotation;
-        // TODO set sprite to dead player
+        anim.enabled = false;
+        rend.sortingOrder = 1;
+        rend.sprite = corpseSprite;
         if (!shots.isPlaying)
         {
             shots.PlayOneShot(shots.clip);
