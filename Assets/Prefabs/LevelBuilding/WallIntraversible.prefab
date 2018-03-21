@@ -40,7 +40,7 @@ GameObject:
   - component: {fileID: 212408365889905154}
   - component: {fileID: 61472926811986068}
   m_Layer: 8
-  m_Name: Barrel
+  m_Name: WallIntraversible
   m_TagString: Ground
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
