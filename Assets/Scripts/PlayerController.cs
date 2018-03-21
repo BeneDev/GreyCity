@@ -351,6 +351,8 @@ public class PlayerController : MonoBehaviour {
         heartBeatAudioSource.Stop();
 
         anim.SetTrigger("Detected");
+        // Set the player to the ground
+        transform.position = new Vector3(transform.position.x, -0.5445f);
 
         // Disable the script
         gameObject.GetComponent<PlayerController>().enabled = false;
