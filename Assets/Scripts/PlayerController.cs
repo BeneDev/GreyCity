@@ -95,6 +95,8 @@ public class PlayerController : MonoBehaviour {
         public RaycastHit2D top;
         public RaycastHit2D detectRight;
         public RaycastHit2D detectLeft;
+        public RaycastHit2D slopeRight;
+        public RaycastHit2D slopeLeft;
     }
     PlayerRaycasts rays;
 
@@ -224,6 +226,9 @@ public class PlayerController : MonoBehaviour {
             rays.detectRight = Physics2D.Raycast(transform.position + Vector3.left * 0.4f, Vector2.right, 0.3f);
             rays.detectLeft = Physics2D.Raycast(transform.position + Vector3.left * 0.4f, Vector2.right, 0.3f);
 
+            rays.slopeLeft = Physics2D.Raycast(transform.position + Vector3.up * -0.7f + Vector3.left * 0.2f, Vector3.left, 0.4f);
+            rays.slopeRight = Physics2D.Raycast(transform.position + Vector3.up * -0.7f + Vector3.right * 0.2f, Vector3.right * 0.4f);
+
             rays.top = Physics2D.Raycast(transform.position + Vector3.up * 0.4f, Vector2.up, 0.2f, layersToCollideWith);
 
             anyPhysicsRaycast[0] = rays.bottomRight;
@@ -279,23 +284,23 @@ public class PlayerController : MonoBehaviour {
                 GameManager.Instance.MakeNoise(walkNoiseRadius, transform.position);
             }
             anim.SetFloat("Velocity", GetValue(velocity.x * 100f));
-            //if (velocity.x > 0.0001f || velocity.x < -0.0001f)
-            //{
-            //    anim.SetFloat("Velocity", 1f);
-            //}
-            //else
-            //{
-            //    anim.SetFloat("Velocity", 0f);
-            //}
+
+            if (RaycastForTag("Ground", rays.slopeLeft, rays.slopeRight))
+            {
+                RaycastHit2D hit = (RaycastHit2D)WhichRaycastForTag("Ground", rays.slopeRight, rays.slopeLeft);
+                float slopeAngle = Vector2.Angle(hit.normal, Vector2.up);
+                print("slope: " + slopeAngle.ToString());
+            }
+
             transform.position += velocity;
         }
     }
 
-    //private void OnDrawGizmos()
-    //{
-    //    Gizmos.DrawRay(transform.position + Vector3.up * 0.1f, Vector2.up * 0.2f);
-    //    Gizmos.DrawRay(transform.position + Vector3.up * -0.4f + Vector3.right * 0.4f, Vector2.left * 0.2f);
-    //}
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawRay(transform.position + Vector3.up * -0.7f + Vector3.left * 0.2f, Vector3.left * 0.4f);
+        Gizmos.DrawRay(transform.position + Vector3.up * -0.7f + Vector3.right * 0.2f, Vector3.right * 0.4f);
+    }
 
 
     #region HelperMethods
