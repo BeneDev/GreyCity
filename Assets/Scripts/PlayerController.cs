@@ -314,6 +314,7 @@ public class PlayerController : MonoBehaviour {
         anim.enabled = false;
         rend.sortingOrder = 1;
         rend.sprite = corpseSprite;
+
         if (!shots.isPlaying)
         {
             shots.PlayOneShot(shots.clip);
