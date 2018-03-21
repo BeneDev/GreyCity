@@ -59,6 +59,14 @@ public class GeneralEnemy : MonoBehaviour
         }
         set
         {
+            if (value != Vector3.zero)
+            {
+                anim.SetBool("LookAround", true);
+            }
+            else
+            {
+                anim.SetBool("LookAround", false);
+            }
             pointToCheck = value;
             if (alertedSound)
             {
@@ -364,7 +372,6 @@ public class GeneralEnemy : MonoBehaviour
         {
             BLookLeft = true;
         }
-        anim.SetTrigger("LookAround");
         // Wait a seconds before the enemy will carefully walk towards the point
         yield return new WaitForSeconds(1f);
         if (!eyes.GetComponent<BoxCollider2D>().bounds.Contains(pointToCheck))
@@ -402,6 +409,7 @@ public class GeneralEnemy : MonoBehaviour
         // Wait for given seconds until the point to walk to is reset to being zero
         yield return new WaitForSeconds(seconds);
         pointToCheck = Vector3.zero;
+        anim.SetBool("LookAround", false);
         //StartCoroutine(LookAround());
     }
 
