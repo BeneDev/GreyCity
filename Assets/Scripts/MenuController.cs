@@ -14,6 +14,8 @@ public class MenuController : MonoBehaviour {
     private float radioStartTime = 0f;
     private float callStartTime = 0f;
 
+    private bool bNotCall = true;
+
 	// Use this for initialization
 	void Start () {
         absolutStartTime = Time.realtimeSinceStartup;
@@ -29,25 +31,27 @@ public class MenuController : MonoBehaviour {
                 radioStartTime = Time.realtimeSinceStartup + 3f;
             }
         }
-		if(Time.realtimeSinceStartup >= radioStartTime + radio.clip.length)
+		if(Time.realtimeSinceStartup >= radioStartTime + radio.clip.length && bNotCall)
         {
             radio.Stop();
             if (!call.isPlaying)
             {
                 call.Play();
                 callStartTime = Time.realtimeSinceStartup;
+                bNotCall = false;
                 StartCoroutine(PickUpPhone());
             }
         }
         if(Time.realtimeSinceStartup >= callStartTime + call.clip.length)
         {
+            print("call scene");
             SceneManager.LoadScene(1);
         }
 	}
 
     IEnumerator PickUpPhone()
     {
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(6.2f);
         frame1.SetActive(false);
         frame2.SetActive(true);
     }
