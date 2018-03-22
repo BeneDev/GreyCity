@@ -47,7 +47,7 @@ public class GameManager : MonoBehaviour {
         else
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            //DontDestroyOnLoad(gameObject);
         }
         // Set the first checkpoint to the starting point of the player
         currentCheckpoint = Vector3.zero;
@@ -124,7 +124,6 @@ public class GameManager : MonoBehaviour {
         // Otherwise it's GameOver
         else
         {
-            print("Gameover");
             loseQuote.gameObject.SetActive(true);
             buttons.gameObject.SetActive(true);
         }

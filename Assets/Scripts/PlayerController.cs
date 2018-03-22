@@ -31,6 +31,14 @@ public class PlayerController : MonoBehaviour {
         }
     }
 
+    public Vector3 Velocity
+    {
+        get
+        {
+            return velocity;
+        }
+    }
+
     #endregion
 
     #region Fields
@@ -132,6 +140,12 @@ public class PlayerController : MonoBehaviour {
     }
 
     void Update () {
+        if(transform.position.x >= 223.5f)
+        {
+            GameManager.Instance.OnWin();
+            bDead = true;
+
+        }
         if (anim.GetCurrentAnimatorStateInfo(0).IsName("Idling"))
         {
             if (idleCounter <= 0f)
@@ -217,7 +231,7 @@ public class PlayerController : MonoBehaviour {
                 GameManager.Instance.MakeNoise(shoutRange, transform.position);
             }
         }
-        else
+        else if(transform.position.x < 223.4f)
         {
             Die();
         }
