@@ -409,3 +409,6 @@ MonoBehaviour:
   flashMaxBetween: 30
   flashMinBetween: 1
   flashLightDecreaseFactor: 1
+  winQuote: {fileID: 0}
+  loseQuote: {fileID: 0}
+  buttons: {fileID: 0}

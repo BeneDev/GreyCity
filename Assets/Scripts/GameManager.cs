@@ -29,6 +29,10 @@ public class GameManager : MonoBehaviour {
 
     [SerializeField] float flashLightDecreaseFactor = 1f;
 
+    [Header("UI"), SerializeField] Canvas winQuote;
+    [SerializeField] Canvas loseQuote;
+    [SerializeField] Canvas buttons;
+
     private float flashCounter; // The timer to tick down and create a lightning strike
 
     #endregion
@@ -76,17 +80,12 @@ public class GameManager : MonoBehaviour {
         {
             GetNextPlayer();
         }
-        //// Play the sound with a random volume when the counter is zero or lower 
-        //if (flashCounter <= 0f)
-        //{
-        //    sun.GetComponent<Light>().intensity = 4f;
-        //    StartCoroutine(ResetSun());
-        //}
-        //// Otherwise tick down the counter
-        //else if (flashCounter > 0f)
-        //{
-        //    flashCounter -= Time.deltaTime;
-        //}
+    }
+
+    public void OnWin()
+    {
+        winQuote.enabled = true;
+        buttons.enabled = true;
     }
 
     public void LightningStrike()
@@ -125,8 +124,8 @@ public class GameManager : MonoBehaviour {
         // Otherwise it's GameOver
         else
         {
-            // TODO make a gameover screen
-            print("Gameover");
+            loseQuote.enabled = true;
+            buttons.enabled = true;
         }
     }
 
