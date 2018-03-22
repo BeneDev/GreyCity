@@ -36,11 +36,21 @@ public class MenuController : MonoBehaviour {
             {
                 call.Play();
                 callStartTime = Time.realtimeSinceStartup;
+                StartCoroutine(PickUpPhone());
             }
         }
         if(Time.realtimeSinceStartup >= callStartTime + call.clip.length)
         {
+            print("Load the fucking scene you asshole");
             SceneManager.LoadScene(1);
         }
 	}
+
+    IEnumerator PickUpPhone()
+    {
+        yield return new WaitForSeconds(3f);
+        frame1.SetActive(false);
+        frame2.SetActive(true);
+    }
+
 }
