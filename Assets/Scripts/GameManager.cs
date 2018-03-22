@@ -84,8 +84,8 @@ public class GameManager : MonoBehaviour {
 
     public void OnWin()
     {
-        winQuote.enabled = true;
-        buttons.enabled = true;
+        winQuote.gameObject.SetActive(true);
+        buttons.gameObject.SetActive(true);
     }
 
     public void LightningStrike()
@@ -124,8 +124,9 @@ public class GameManager : MonoBehaviour {
         // Otherwise it's GameOver
         else
         {
-            loseQuote.enabled = true;
-            buttons.enabled = true;
+            print("Gameover");
+            loseQuote.gameObject.SetActive(true);
+            buttons.gameObject.SetActive(true);
         }
     }
 

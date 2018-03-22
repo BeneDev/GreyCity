@@ -28,14 +28,17 @@ public class FollowPlayer : MonoBehaviour {
     }
 	
 	void Update () {
-        if(!player.GetComponent<PlayerController>().hasMoved)
+        if (player)
         {
-            cam.orthographicSize = zoomedOutValue;
-        }
-        else if(cam.orthographicSize != normalCamZoom)
-        {
-            float newZoom = Mathf.Lerp(cam.orthographicSize, normalCamZoom, zoomInSpeed * Time.deltaTime);
-            cam.orthographicSize = newZoom;
+            if (!player.GetComponent<PlayerController>().hasMoved)
+            {
+                cam.orthographicSize = zoomedOutValue;
+            }
+            else if (cam.orthographicSize != normalCamZoom)
+            {
+                float newZoom = Mathf.Lerp(cam.orthographicSize, normalCamZoom, zoomInSpeed * Time.deltaTime);
+                cam.orthographicSize = newZoom;
+            }
         }
         // Follow the player if there is one referenced in the field
         if (player)

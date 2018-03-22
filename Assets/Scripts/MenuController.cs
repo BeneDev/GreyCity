@@ -41,7 +41,6 @@ public class MenuController : MonoBehaviour {
         }
         if(Time.realtimeSinceStartup >= callStartTime + call.clip.length)
         {
-            print("Load the fucking scene you asshole");
             SceneManager.LoadScene(1);
         }
 	}
