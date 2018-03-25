@@ -45,8 +45,26 @@ public class FollowPlayer : MonoBehaviour {
         {
             // Make smooth transition to the currently active player
             Vector3 newPos = transform.position;
-            newPos.y = Mathf.Lerp(transform.position.y, player.transform.position.y, speed * Time.deltaTime);
-            newPos.x = Mathf.Lerp(transform.position.x, player.transform.position.x, speed * Time.deltaTime);
+            if (player.transform.position.y > 2f)
+            {
+                newPos.y = Mathf.Lerp(transform.position.y, player.transform.position.y - 3f, speed * Time.deltaTime);
+            }
+            else if(player.GetComponent<PlayerController>().Velocity.y < 0.1f)
+            {
+                newPos.y = Mathf.Lerp(transform.position.y, player.transform.position.y, speed * Time.deltaTime);
+            }
+            if (player.GetComponent<PlayerController>().Velocity.x > 0.02f)
+            {
+                newPos.x = Mathf.Lerp(transform.position.x, player.transform.position.x + 4f, speed * Time.deltaTime);
+            }
+            else if (player.GetComponent<PlayerController>().Velocity.x < -0.02f)
+            {
+                newPos.x = Mathf.Lerp(transform.position.x, player.transform.position.x - 4f, speed * Time.deltaTime);
+            }
+            else
+            {
+                newPos.x = Mathf.Lerp(transform.position.x, player.transform.position.x, speed * Time.deltaTime);
+            }
 
             transform.position = newPos;
         }

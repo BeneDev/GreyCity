@@ -288,7 +288,7 @@ public class GeneralEnemy : MonoBehaviour
         }
         else if (durationUntilNotDetectedCounter <= 0f && BDetected)
         {
-            StartCoroutine(LookAround());
+            //StartCoroutine(LookAround());
             BDetected = false;
         }
     }
@@ -306,7 +306,7 @@ public class GeneralEnemy : MonoBehaviour
         player.GetComponent<PlayerController>().DetectionCounter -= Time.deltaTime;
         if (player.GetComponent<PlayerController>().DetectionCounter <= 0f)
         {
-            StartCoroutine(LookAround());
+            //StartCoroutine(LookAround());
             BDetected = false;
         }
         // Walk towards the player when he is farther away than the stopping distance 
@@ -320,11 +320,11 @@ public class GeneralEnemy : MonoBehaviour
             {
                 BLookLeft = true;
             }
-            if (toPlayer.magnitude > stoppingDistance)
+            if (toPlayer.magnitude > stoppingDistance + 0.2f)
             {
                 transform.position += new Vector3(moveSpeed * 2f * transform.localScale.x * Time.deltaTime, 0f);
             }
-            else if(toPlayer.magnitude < stoppingDistance)
+            else if(toPlayer.magnitude < stoppingDistance - 0.2f)
             {
                 transform.position += new Vector3(moveSpeed * 2f * -transform.localScale.x * Time.deltaTime, 0f);
             }
@@ -392,12 +392,6 @@ public class GeneralEnemy : MonoBehaviour
     }
 
     #endregion
-
-    protected void WaitForSeconds(float seconds)
-    {
-        float startTime = Time.time;
-
-    }
 
     /// <summary>
     /// Make the enemy give up the searching for the source of a sound he hears
