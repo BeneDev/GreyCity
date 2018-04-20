@@ -10,6 +10,8 @@ public class MenuController : MonoBehaviour {
     [SerializeField] GameObject frame1;
     [SerializeField] GameObject frame2;
 
+    [SerializeField] GameObject skipText;
+
     private float absolutStartTime;
     private float radioStartTime = 0f;
     private float callStartTime = 0f;
@@ -19,10 +21,24 @@ public class MenuController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         absolutStartTime = Time.realtimeSinceStartup;
+        skipText.SetActive(false);
 	}
 	
 	// Update is called once per frame
 	void Update () {
+
+        if(Input.GetButtonDown("Jump"))
+        {
+            if(!skipText.activeSelf)
+            {
+                skipText.SetActive(true);
+            }
+            else
+            {
+                SceneManager.LoadScene(1);
+            }
+        }
+
         if (Time.realtimeSinceStartup >= absolutStartTime + 1.5f && radioStartTime == 0f)
         {
             if (!radio.isPlaying)
